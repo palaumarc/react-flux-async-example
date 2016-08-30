@@ -1,19 +1,44 @@
 var React = require('react');
+var DadesMunicipi = require('./DadesMunicipi')
 
 var Municipi = React.createClass({
 
+  getInitialState: function() {
+    return {
+      selectedMunicipi: this.props.municipis[0]
+    }
+  },
+
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      selectedMunicipi: nextProps.municipis[0]
+    })
+  },
+
+  selectChangeHandler: function(e) {
+    var selectedMunicipiId = e.target.value;
+    var selectedMunicipi = this.props.municipis.filter(function(municipi) {
+      return municipi.codi === selectedMunicipiId;
+    })
+
+    this.setState({
+      selectedMunicipi: selectedMunicipi[0]
+    })
+  },
+
   render: function() {
+
+    var listItems = this.props.municipis.map((municipi, index) => (
+      <option key={index} value={municipi.codi}>{municipi.nom}</option>
+    ));
+
     return (
       <div>
         <h2>Municipi:</h2>
-        <select>
-          <option value="volvo">Volvo</option>
-          <option value="saab">Saab</option>
-          <option value="mercedes">Mercedes</option>
-          <option value="audi">Audi</option>
+        <select onChange={this.selectChangeHandler}>
+          {listItems}
         </select>
-        <h2>Comarca:</h2>
-        <h4>Nom comcarca</h4>
+        <DadesMunicipi municipi={this.state.selectedMunicipi}/>
       </div>
     )
   }
