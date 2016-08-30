@@ -21965,8 +21965,9 @@
 	
 	var React = __webpack_require__(/*! react */ 1);
 	var Municipi = __webpack_require__(/*! ./Municipi */ 173);
-	var municipisStore = __webpack_require__(/*! ../stores/MunicipisStore */ 174);
-	var actions = __webpack_require__(/*! ../actions/MunicipisActions */ 194);
+	var municipisStore = __webpack_require__(/*! ../stores/MunicipisStore */ 199);
+	var municipiStore = __webpack_require__(/*! ../stores/MunicipiStore */ 181);
+	var actions = __webpack_require__(/*! ../actions/MunicipisActions */ 175);
 	
 	var MainContainer = React.createClass({
 	  displayName: 'MainContainer',
@@ -21974,22 +21975,32 @@
 	
 	  getInitialState: function getInitialState() {
 	    return {
-	      municipis: municipisStore.getMunicipis()
+	      municipis: municipisStore.getMunicipis(),
+	      selectedMunicipiCodi: municipiStore.getSelectedMunicipiCodi()
 	    };
 	  },
 	
 	  componentDidMount: function componentDidMount() {
 	    this.municipisStoreRemoveToken = municipisStore.addListener(this.updateMunicipis);
+	    this.municipiStoreRemoveToken = municipiStore.addListener(this.updateSelectedMunicipi);
 	    actions.fetchMunicipis();
 	  },
 	
 	  componentWillUnmount: function componentWillUnmount() {
 	    this.municipisStoreRemoveToken.remove();
+	    this.municipiStoreRemoveToken.remove();
+	  },
+	
+	  updateSelectedMunicipi: function updateSelectedMunicipi() {
+	    this.setState({
+	      selectedMunicipiCodi: municipiStore.getSelectedMunicipiCodi()
+	    });
 	  },
 	
 	  updateMunicipis: function updateMunicipis() {
 	    this.setState({
-	      municipis: municipisStore.getMunicipis()
+	      municipis: municipisStore.getMunicipis(),
+	      selectedMunicipiCodi: municipisStore.getMunicipis()[0].codi
 	    });
 	  },
 	
@@ -22006,7 +22017,7 @@
 	    return React.createElement(
 	      'div',
 	      null,
-	      React.createElement(Municipi, { municipis: this.state.municipis })
+	      React.createElement(Municipi, { municipis: this.state.municipis, selectedMunicipiCodi: this.state.selectedMunicipiCodi })
 	    );
 	  }
 	});
@@ -22023,80 +22034,37 @@
 	'use strict';
 	
 	var React = __webpack_require__(/*! react */ 1);
-	var DadesMunicipi = __webpack_require__(/*! ./DadesMunicipi */ 198);
-	var actions = __webpack_require__(/*! ../actions/MunicipisActions */ 194);
-	var municipiStore = __webpack_require__(/*! ../stores/MunicipiStore */ 199);
-	var municipisStore = __webpack_require__(/*! ../stores/MunicipisStore */ 174);
+	var DadesMunicipi = __webpack_require__(/*! ./DadesMunicipi */ 174);
+	var actions = __webpack_require__(/*! ../actions/MunicipisActions */ 175);
+	var municipiStore = __webpack_require__(/*! ../stores/MunicipiStore */ 181);
+	var municipisStore = __webpack_require__(/*! ../stores/MunicipisStore */ 199);
 	
 	var Municipi = React.createClass({
 	  displayName: 'Municipi',
 	
 	
-	  getInitialState: function getInitialState() {
-	    return {
-	      selectedMunicipiPrediccio: this.props.municipis[0],
-	      selectedMunicipi: municipisStore.getDefaultMunicipi()
-	    };
-	  },
-	
-	  componentDidMount: function componentDidMount() {
-	    this.municipiStoreRemoveToken = municipiStore.addListener(this.updateSelectedMunicipi);
-	  },
-	
-	  componentWillUnmount: function componentWillUnmount() {
-	    this.municipiStoreRemoveToken.remove();
-	  },
-	
-	  componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
-	    var _this = this;
-	
-	    fetch('/municipis/' + nextProps.municipis[0].codi).then(function (response) {
-	      return response.json();
-	    }).then(function (prediccio) {
-	      _this.setState({
-	        selectedMunicipiPrediccio: prediccio
-	      });
-	    });
-	  },
-	
-	
-	  updateSelectedMunicipi: function updateSelectedMunicipi() {
-	    this.setState({
-	      selectedMunicipi: municipiStore.getSelectedMunicipi()
-	    });
-	  },
-	
 	  selectChangeHandler: function selectChangeHandler(e) {
-	    var _this2 = this;
-	
-	    var indexOfSelectedMunicipi = e.target.value;
-	
-	    fetch('/municipis/' + this.props.municipis[indexOfSelectedMunicipi].codi).then(function (response) {
-	      return response.json();
-	    }).then(function (prediccio) {
-	      _this2.setState({
-	        selectedMunicipiPrediccio: prediccio
-	      });
-	    });
-	
-	    actions.selectMunicipi(this.props.municipis[indexOfSelectedMunicipi]);
+	    var selectedMunicipiCodi = e.target.value;
+	    actions.selectMunicipi(selectedMunicipiCodi);
 	  },
 	
 	  render: function render() {
-	    var _this3 = this;
+	    var _this = this;
 	
 	    var divStyle = { float: 'left' };
 	    var defaultSelectValue = 0;
-	    var nomComarca = this.state.selectedMunicipi.comarca ? this.state.selectedMunicipi.comarca.nom : '';
+	    var nomComarca = '';
 	
 	    var listItems = this.props.municipis.map(function (municipi, index) {
 	
-	      if (municipi.codi === _this3.state.selectedMunicipi.codi) {
+	      if (municipi.codi === _this.props.selectedMunicipiCodi) {
 	        defaultSelectValue = index;
+	        nomComarca = municipi.comarca.nom;
 	      }
+	
 	      return React.createElement(
 	        'option',
-	        { key: index, value: index },
+	        { key: index, value: municipi.codi },
 	        municipi.nom
 	      );
 	    });
@@ -22128,16 +22096,451 @@
 
 /***/ },
 /* 174 */
-/*!*******************************************!*\
-  !*** ./frontend/stores/MunicipisStore.js ***!
-  \*******************************************/
+/*!**********************************************!*\
+  !*** ./frontend/components/DadesMunicipi.js ***!
+  \**********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var React = __webpack_require__(/*! react */ 1);
+	
+	var DadesMunicipi = React.createClass({
+	  displayName: 'DadesMunicipi',
+	
+	
+	  render: function render() {
+	
+	    if (!this.props.municipi) {
+	      return React.createElement(
+	        'div',
+	        null,
+	        'Loading...'
+	      );
+	    }
+	
+	    return React.createElement(
+	      'div',
+	      null,
+	      React.createElement(
+	        'h3',
+	        null,
+	        'Codi:'
+	      ),
+	      this.props.municipi.codi,
+	      React.createElement(
+	        'h3',
+	        null,
+	        'Dia1:'
+	      ),
+	      this.props.municipi.dies[0].variables.precipitacio.valor,
+	      React.createElement(
+	        'h3',
+	        null,
+	        'Dia2:'
+	      ),
+	      this.props.municipi.dies[1].variables.precipitacio.valor
+	    );
+	  }
+	});
+	
+	module.exports = DadesMunicipi;
+
+/***/ },
+/* 175 */
+/*!**********************************************!*\
+  !*** ./frontend/actions/MunicipisActions.js ***!
+  \**********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var actionConstants = __webpack_require__(/*! ./MunicipisActionNames */ 176);
+	var AppDispatcher = __webpack_require__(/*! ../dispatcher/AppDispatcher */ 177);
+	
+	module.exports = {
+	
+	  selectMunicipi: function selectMunicipi(codiMunicipi) {
+	    AppDispatcher.dispatch({
+	      type: actionConstants.SELECT_MUNICIPI,
+	      codiMunicipi: codiMunicipi
+	    });
+	  },
+	
+	  fetchMunicipis: function fetchMunicipis() {
+	    AppDispatcher.dispatch({
+	      type: actionConstants.FETCH_MUNICIPIS
+	    });
+	  },
+	
+	  receiveMunicipis: function receiveMunicipis(municipis) {
+	    AppDispatcher.dispatch({
+	      type: actionConstants.RECEIVE_MUNICIPIS,
+	      municipis: municipis
+	    });
+	  }
+	};
+
+/***/ },
+/* 176 */
+/*!**************************************************!*\
+  !*** ./frontend/actions/MunicipisActionNames.js ***!
+  \**************************************************/
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	module.exports = {
+	
+	  SELECT_MUNICIPI: 'SELECT_MUNICIPI',
+	  FETCH_MUNICIPIS: 'FETCH_MUNICIPIS',
+	  RECEIVE_MUNICIPIS: 'RECEIVE_MUNICIPIS'
+	
+	};
+
+/***/ },
+/* 177 */
+/*!**********************************************!*\
+  !*** ./frontend/dispatcher/AppDispatcher.js ***!
+  \**********************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _flux = __webpack_require__(/*! flux */ 178);
+	
+	var AppDispatcher = new _flux.Dispatcher();
+	module.exports = AppDispatcher;
+
+/***/ },
+/* 178 */
+/*!*************************!*\
+  !*** ./~/flux/index.js ***!
+  \*************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Copyright (c) 2014-2015, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 */
+	
+	module.exports.Dispatcher = __webpack_require__(/*! ./lib/Dispatcher */ 179);
+
+
+/***/ },
+/* 179 */
+/*!**********************************!*\
+  !*** ./~/flux/lib/Dispatcher.js ***!
+  \**********************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(process) {/**
+	 * Copyright (c) 2014-2015, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule Dispatcher
+	 * 
+	 * @preventMunge
+	 */
+	
+	'use strict';
+	
+	exports.__esModule = true;
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+	
+	var invariant = __webpack_require__(/*! fbjs/lib/invariant */ 180);
+	
+	var _prefix = 'ID_';
+	
+	/**
+	 * Dispatcher is used to broadcast payloads to registered callbacks. This is
+	 * different from generic pub-sub systems in two ways:
+	 *
+	 *   1) Callbacks are not subscribed to particular events. Every payload is
+	 *      dispatched to every registered callback.
+	 *   2) Callbacks can be deferred in whole or part until other callbacks have
+	 *      been executed.
+	 *
+	 * For example, consider this hypothetical flight destination form, which
+	 * selects a default city when a country is selected:
+	 *
+	 *   var flightDispatcher = new Dispatcher();
+	 *
+	 *   // Keeps track of which country is selected
+	 *   var CountryStore = {country: null};
+	 *
+	 *   // Keeps track of which city is selected
+	 *   var CityStore = {city: null};
+	 *
+	 *   // Keeps track of the base flight price of the selected city
+	 *   var FlightPriceStore = {price: null}
+	 *
+	 * When a user changes the selected city, we dispatch the payload:
+	 *
+	 *   flightDispatcher.dispatch({
+	 *     actionType: 'city-update',
+	 *     selectedCity: 'paris'
+	 *   });
+	 *
+	 * This payload is digested by `CityStore`:
+	 *
+	 *   flightDispatcher.register(function(payload) {
+	 *     if (payload.actionType === 'city-update') {
+	 *       CityStore.city = payload.selectedCity;
+	 *     }
+	 *   });
+	 *
+	 * When the user selects a country, we dispatch the payload:
+	 *
+	 *   flightDispatcher.dispatch({
+	 *     actionType: 'country-update',
+	 *     selectedCountry: 'australia'
+	 *   });
+	 *
+	 * This payload is digested by both stores:
+	 *
+	 *   CountryStore.dispatchToken = flightDispatcher.register(function(payload) {
+	 *     if (payload.actionType === 'country-update') {
+	 *       CountryStore.country = payload.selectedCountry;
+	 *     }
+	 *   });
+	 *
+	 * When the callback to update `CountryStore` is registered, we save a reference
+	 * to the returned token. Using this token with `waitFor()`, we can guarantee
+	 * that `CountryStore` is updated before the callback that updates `CityStore`
+	 * needs to query its data.
+	 *
+	 *   CityStore.dispatchToken = flightDispatcher.register(function(payload) {
+	 *     if (payload.actionType === 'country-update') {
+	 *       // `CountryStore.country` may not be updated.
+	 *       flightDispatcher.waitFor([CountryStore.dispatchToken]);
+	 *       // `CountryStore.country` is now guaranteed to be updated.
+	 *
+	 *       // Select the default city for the new country
+	 *       CityStore.city = getDefaultCityForCountry(CountryStore.country);
+	 *     }
+	 *   });
+	 *
+	 * The usage of `waitFor()` can be chained, for example:
+	 *
+	 *   FlightPriceStore.dispatchToken =
+	 *     flightDispatcher.register(function(payload) {
+	 *       switch (payload.actionType) {
+	 *         case 'country-update':
+	 *         case 'city-update':
+	 *           flightDispatcher.waitFor([CityStore.dispatchToken]);
+	 *           FlightPriceStore.price =
+	 *             getFlightPriceStore(CountryStore.country, CityStore.city);
+	 *           break;
+	 *     }
+	 *   });
+	 *
+	 * The `country-update` payload will be guaranteed to invoke the stores'
+	 * registered callbacks in order: `CountryStore`, `CityStore`, then
+	 * `FlightPriceStore`.
+	 */
+	
+	var Dispatcher = (function () {
+	  function Dispatcher() {
+	    _classCallCheck(this, Dispatcher);
+	
+	    this._callbacks = {};
+	    this._isDispatching = false;
+	    this._isHandled = {};
+	    this._isPending = {};
+	    this._lastID = 1;
+	  }
+	
+	  /**
+	   * Registers a callback to be invoked with every dispatched payload. Returns
+	   * a token that can be used with `waitFor()`.
+	   */
+	
+	  Dispatcher.prototype.register = function register(callback) {
+	    var id = _prefix + this._lastID++;
+	    this._callbacks[id] = callback;
+	    return id;
+	  };
+	
+	  /**
+	   * Removes a callback based on its token.
+	   */
+	
+	  Dispatcher.prototype.unregister = function unregister(id) {
+	    !this._callbacks[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id) : invariant(false) : undefined;
+	    delete this._callbacks[id];
+	  };
+	
+	  /**
+	   * Waits for the callbacks specified to be invoked before continuing execution
+	   * of the current callback. This method should only be used by a callback in
+	   * response to a dispatched payload.
+	   */
+	
+	  Dispatcher.prototype.waitFor = function waitFor(ids) {
+	    !this._isDispatching ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): Must be invoked while dispatching.') : invariant(false) : undefined;
+	    for (var ii = 0; ii < ids.length; ii++) {
+	      var id = ids[ii];
+	      if (this._isPending[id]) {
+	        !this._isHandled[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id) : invariant(false) : undefined;
+	        continue;
+	      }
+	      !this._callbacks[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id) : invariant(false) : undefined;
+	      this._invokeCallback(id);
+	    }
+	  };
+	
+	  /**
+	   * Dispatches a payload to all registered callbacks.
+	   */
+	
+	  Dispatcher.prototype.dispatch = function dispatch(payload) {
+	    !!this._isDispatching ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.') : invariant(false) : undefined;
+	    this._startDispatching(payload);
+	    try {
+	      for (var id in this._callbacks) {
+	        if (this._isPending[id]) {
+	          continue;
+	        }
+	        this._invokeCallback(id);
+	      }
+	    } finally {
+	      this._stopDispatching();
+	    }
+	  };
+	
+	  /**
+	   * Is this Dispatcher currently dispatching.
+	   */
+	
+	  Dispatcher.prototype.isDispatching = function isDispatching() {
+	    return this._isDispatching;
+	  };
+	
+	  /**
+	   * Call the callback stored with the given id. Also do some internal
+	   * bookkeeping.
+	   *
+	   * @internal
+	   */
+	
+	  Dispatcher.prototype._invokeCallback = function _invokeCallback(id) {
+	    this._isPending[id] = true;
+	    this._callbacks[id](this._pendingPayload);
+	    this._isHandled[id] = true;
+	  };
+	
+	  /**
+	   * Set up bookkeeping needed when dispatching.
+	   *
+	   * @internal
+	   */
+	
+	  Dispatcher.prototype._startDispatching = function _startDispatching(payload) {
+	    for (var id in this._callbacks) {
+	      this._isPending[id] = false;
+	      this._isHandled[id] = false;
+	    }
+	    this._pendingPayload = payload;
+	    this._isDispatching = true;
+	  };
+	
+	  /**
+	   * Clear bookkeeping used for dispatching.
+	   *
+	   * @internal
+	   */
+	
+	  Dispatcher.prototype._stopDispatching = function _stopDispatching() {
+	    delete this._pendingPayload;
+	    this._isDispatching = false;
+	  };
+	
+	  return Dispatcher;
+	})();
+	
+	module.exports = Dispatcher;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 3)))
+
+/***/ },
+/* 180 */
+/*!*********************************!*\
+  !*** ./~/fbjs/lib/invariant.js ***!
+  \*********************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(process) {/**
+	 * Copyright 2013-2015, Facebook, Inc.
+	 * All rights reserved.
+	 *
+	 * This source code is licensed under the BSD-style license found in the
+	 * LICENSE file in the root directory of this source tree. An additional grant
+	 * of patent rights can be found in the PATENTS file in the same directory.
+	 *
+	 * @providesModule invariant
+	 */
+	
+	"use strict";
+	
+	/**
+	 * Use invariant() to assert state which your program assumes to be true.
+	 *
+	 * Provide sprintf-style format (only %s is supported) and arguments
+	 * to provide information about what broke and what you were
+	 * expecting.
+	 *
+	 * The invariant message will be stripped in production, but the invariant
+	 * will remain to ensure logic does not differ in production.
+	 */
+	
+	var invariant = function (condition, format, a, b, c, d, e, f) {
+	  if (process.env.NODE_ENV !== 'production') {
+	    if (format === undefined) {
+	      throw new Error('invariant requires an error message argument');
+	    }
+	  }
+	
+	  if (!condition) {
+	    var error;
+	    if (format === undefined) {
+	      error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
+	    } else {
+	      var args = [a, b, c, d, e, f];
+	      var argIndex = 0;
+	      error = new Error('Invariant Violation: ' + format.replace(/%s/g, function () {
+	        return args[argIndex++];
+	      }));
+	    }
+	
+	    error.framesToPop = 1; // we don't care about invariant's own frame
+	    throw error;
+	  }
+	};
+	
+	module.exports = invariant;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 3)))
+
+/***/ },
+/* 181 */
+/*!******************************************!*\
+  !*** ./frontend/stores/MunicipiStore.js ***!
+  \******************************************/
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _utils = __webpack_require__(/*! flux/utils */ 175);
+	var _utils = __webpack_require__(/*! flux/utils */ 182);
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
@@ -22145,45 +22548,32 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
-	var actionNames = __webpack_require__(/*! ../actions/MunicipisActionNames */ 193);
-	var actions = __webpack_require__(/*! ../actions/MunicipisActions */ 194);
-	var AppDispatcher = __webpack_require__(/*! ../dispatcher/AppDispatcher */ 195);
+	var actionNames = __webpack_require__(/*! ../actions/MunicipisActionNames */ 176);
+	var actions = __webpack_require__(/*! ../actions/MunicipisActions */ 175);
+	var AppDispatcher = __webpack_require__(/*! ../dispatcher/AppDispatcher */ 177);
+	var municipisStore = __webpack_require__(/*! ./MunicipisStore */ 199);
 	
-	var MunicipisStore = function (_Store) {
-	  _inherits(MunicipisStore, _Store);
+	var MunicipiStore = function (_Store) {
+	  _inherits(MunicipiStore, _Store);
 	
-	  function MunicipisStore(dispatcher) {
-	    _classCallCheck(this, MunicipisStore);
+	  function MunicipiStore(dispatcher) {
+	    _classCallCheck(this, MunicipiStore);
 	
-	    var _this = _possibleConstructorReturn(this, (MunicipisStore.__proto__ || Object.getPrototypeOf(MunicipisStore)).call(this, dispatcher));
+	    var _this = _possibleConstructorReturn(this, (MunicipiStore.__proto__ || Object.getPrototypeOf(MunicipiStore)).call(this, dispatcher));
 	
-	    _this.municipis = [];
+	    _this.selectedMunicipiCodi = '';
 	    return _this;
 	  }
 	
-	  _createClass(MunicipisStore, [{
-	    key: 'getMunicipis',
-	    value: function getMunicipis() {
-	      return this.municipis;
+	  _createClass(MunicipiStore, [{
+	    key: 'getSelectedMunicipiCodi',
+	    value: function getSelectedMunicipiCodi() {
+	      return this.selectedMunicipiCodi;
 	    }
 	  }, {
-	    key: 'getDefaultMunicipi',
-	    value: function getDefaultMunicipi() {
-	      return this.municipis[0];
-	    }
-	  }, {
-	    key: 'fetchMunicipis',
-	    value: function fetchMunicipis() {
-	      fetch('/municipis/metadades').then(function (response) {
-	        return response.json();
-	      }).then(function (receivedMetadata) {
-	        actions.receiveMunicipis(receivedMetadata);
-	      });
-	    }
-	  }, {
-	    key: 'receiveMunicipis',
-	    value: function receiveMunicipis(newMunicipis) {
-	      this.municipis = newMunicipis;
+	    key: 'selectMunicipi',
+	    value: function selectMunicipi(codiMunicipi) {
+	      this.selectedMunicipiCodi = codiMunicipi;
 	    }
 	
 	    // Overriden method given by Flux library Store 
@@ -22194,26 +22584,22 @@
 	
 	      switch (action.type) {
 	
-	        case actionNames.FETCH_MUNICIPIS:
-	          this.fetchMunicipis();
-	          break;
-	
-	        case actionNames.RECEIVE_MUNICIPIS:
-	          this.receiveMunicipis(action.municipis);
+	        case actionNames.SELECT_MUNICIPI:
+	          this.selectMunicipi(action.codiMunicipi);
 	          this.__emitChange();
 	          break;
 	      }
 	    }
 	  }]);
 	
-	  return MunicipisStore;
+	  return MunicipiStore;
 	}(_utils.Store);
 	
-	var instance = new MunicipisStore(AppDispatcher);
+	var instance = new MunicipiStore(AppDispatcher);
 	module.exports = instance;
 
 /***/ },
-/* 175 */
+/* 182 */
 /*!*************************!*\
   !*** ./~/flux/utils.js ***!
   \*************************/
@@ -22228,15 +22614,15 @@
 	 * of patent rights can be found in the PATENTS file in the same directory.
 	 */
 	
-	module.exports.Container = __webpack_require__(/*! ./lib/FluxContainer */ 176);
-	module.exports.MapStore = __webpack_require__(/*! ./lib/FluxMapStore */ 180);
-	module.exports.Mixin = __webpack_require__(/*! ./lib/FluxMixinLegacy */ 192);
-	module.exports.ReduceStore = __webpack_require__(/*! ./lib/FluxReduceStore */ 181);
-	module.exports.Store = __webpack_require__(/*! ./lib/FluxStore */ 182);
+	module.exports.Container = __webpack_require__(/*! ./lib/FluxContainer */ 183);
+	module.exports.MapStore = __webpack_require__(/*! ./lib/FluxMapStore */ 186);
+	module.exports.Mixin = __webpack_require__(/*! ./lib/FluxMixinLegacy */ 198);
+	module.exports.ReduceStore = __webpack_require__(/*! ./lib/FluxReduceStore */ 187);
+	module.exports.Store = __webpack_require__(/*! ./lib/FluxStore */ 188);
 
 
 /***/ },
-/* 176 */
+/* 183 */
 /*!*************************************!*\
   !*** ./~/flux/lib/FluxContainer.js ***!
   \*************************************/
@@ -22261,10 +22647,10 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
-	var FluxStoreGroup = __webpack_require__(/*! ./FluxStoreGroup */ 177);
+	var FluxStoreGroup = __webpack_require__(/*! ./FluxStoreGroup */ 184);
 	
-	var invariant = __webpack_require__(/*! fbjs/lib/invariant */ 178);
-	var shallowEqual = __webpack_require__(/*! fbjs/lib/shallowEqual */ 179);
+	var invariant = __webpack_require__(/*! fbjs/lib/invariant */ 180);
+	var shallowEqual = __webpack_require__(/*! fbjs/lib/shallowEqual */ 185);
 	
 	var DEFAULT_OPTIONS = {
 	  pure: true,
@@ -22422,7 +22808,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 3)))
 
 /***/ },
-/* 177 */
+/* 184 */
 /*!**************************************!*\
   !*** ./~/flux/lib/FluxStoreGroup.js ***!
   \**************************************/
@@ -22444,7 +22830,7 @@
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 	
-	var invariant = __webpack_require__(/*! fbjs/lib/invariant */ 178);
+	var invariant = __webpack_require__(/*! fbjs/lib/invariant */ 180);
 	
 	/**
 	 * FluxStoreGroup allows you to execute a callback on every dispatch after
@@ -22506,65 +22892,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 3)))
 
 /***/ },
-/* 178 */
-/*!*********************************!*\
-  !*** ./~/fbjs/lib/invariant.js ***!
-  \*********************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(process) {/**
-	 * Copyright 2013-2015, Facebook, Inc.
-	 * All rights reserved.
-	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
-	 *
-	 * @providesModule invariant
-	 */
-	
-	"use strict";
-	
-	/**
-	 * Use invariant() to assert state which your program assumes to be true.
-	 *
-	 * Provide sprintf-style format (only %s is supported) and arguments
-	 * to provide information about what broke and what you were
-	 * expecting.
-	 *
-	 * The invariant message will be stripped in production, but the invariant
-	 * will remain to ensure logic does not differ in production.
-	 */
-	
-	var invariant = function (condition, format, a, b, c, d, e, f) {
-	  if (process.env.NODE_ENV !== 'production') {
-	    if (format === undefined) {
-	      throw new Error('invariant requires an error message argument');
-	    }
-	  }
-	
-	  if (!condition) {
-	    var error;
-	    if (format === undefined) {
-	      error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
-	    } else {
-	      var args = [a, b, c, d, e, f];
-	      var argIndex = 0;
-	      error = new Error('Invariant Violation: ' + format.replace(/%s/g, function () {
-	        return args[argIndex++];
-	      }));
-	    }
-	
-	    error.framesToPop = 1; // we don't care about invariant's own frame
-	    throw error;
-	  }
-	};
-	
-	module.exports = invariant;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 3)))
-
-/***/ },
-/* 179 */
+/* 185 */
 /*!************************************!*\
   !*** ./~/fbjs/lib/shallowEqual.js ***!
   \************************************/
@@ -22622,7 +22950,7 @@
 	module.exports = shallowEqual;
 
 /***/ },
-/* 180 */
+/* 186 */
 /*!************************************!*\
   !*** ./~/flux/lib/FluxMapStore.js ***!
   \************************************/
@@ -22646,10 +22974,10 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
-	var FluxReduceStore = __webpack_require__(/*! ./FluxReduceStore */ 181);
-	var Immutable = __webpack_require__(/*! immutable */ 191);
+	var FluxReduceStore = __webpack_require__(/*! ./FluxReduceStore */ 187);
+	var Immutable = __webpack_require__(/*! immutable */ 197);
 	
-	var invariant = __webpack_require__(/*! fbjs/lib/invariant */ 178);
+	var invariant = __webpack_require__(/*! fbjs/lib/invariant */ 180);
 	
 	/**
 	 * This is a simple store. It allows caching key value pairs. An implementation
@@ -22775,7 +23103,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 3)))
 
 /***/ },
-/* 181 */
+/* 187 */
 /*!***************************************!*\
   !*** ./~/flux/lib/FluxReduceStore.js ***!
   \***************************************/
@@ -22799,10 +23127,10 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
-	var FluxStore = __webpack_require__(/*! ./FluxStore */ 182);
+	var FluxStore = __webpack_require__(/*! ./FluxStore */ 188);
 	
-	var abstractMethod = __webpack_require__(/*! ./abstractMethod */ 190);
-	var invariant = __webpack_require__(/*! fbjs/lib/invariant */ 178);
+	var abstractMethod = __webpack_require__(/*! ./abstractMethod */ 196);
+	var invariant = __webpack_require__(/*! fbjs/lib/invariant */ 180);
 	
 	var FluxReduceStore = (function (_FluxStore) {
 	  _inherits(FluxReduceStore, _FluxStore);
@@ -22885,7 +23213,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 3)))
 
 /***/ },
-/* 182 */
+/* 188 */
 /*!*********************************!*\
   !*** ./~/flux/lib/FluxStore.js ***!
   \*********************************/
@@ -22907,11 +23235,11 @@
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 	
-	var _require = __webpack_require__(/*! fbemitter */ 183);
+	var _require = __webpack_require__(/*! fbemitter */ 189);
 	
 	var EventEmitter = _require.EventEmitter;
 	
-	var invariant = __webpack_require__(/*! fbjs/lib/invariant */ 178);
+	var invariant = __webpack_require__(/*! fbjs/lib/invariant */ 180);
 	
 	/**
 	 * This class should be extended by the stores in your application, like so:
@@ -23071,7 +23399,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 3)))
 
 /***/ },
-/* 183 */
+/* 189 */
 /*!******************************!*\
   !*** ./~/fbemitter/index.js ***!
   \******************************/
@@ -23087,14 +23415,14 @@
 	 */
 	
 	var fbemitter = {
-	  EventEmitter: __webpack_require__(/*! ./lib/BaseEventEmitter */ 184)
+	  EventEmitter: __webpack_require__(/*! ./lib/BaseEventEmitter */ 190)
 	};
 	
 	module.exports = fbemitter;
 
 
 /***/ },
-/* 184 */
+/* 190 */
 /*!*********************************************!*\
   !*** ./~/fbemitter/lib/BaseEventEmitter.js ***!
   \*********************************************/
@@ -23116,11 +23444,11 @@
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 	
-	var EmitterSubscription = __webpack_require__(/*! ./EmitterSubscription */ 185);
-	var EventSubscriptionVendor = __webpack_require__(/*! ./EventSubscriptionVendor */ 187);
+	var EmitterSubscription = __webpack_require__(/*! ./EmitterSubscription */ 191);
+	var EventSubscriptionVendor = __webpack_require__(/*! ./EventSubscriptionVendor */ 193);
 	
-	var emptyFunction = __webpack_require__(/*! fbjs/lib/emptyFunction */ 189);
-	var invariant = __webpack_require__(/*! fbjs/lib/invariant */ 188);
+	var emptyFunction = __webpack_require__(/*! fbjs/lib/emptyFunction */ 195);
+	var invariant = __webpack_require__(/*! fbjs/lib/invariant */ 194);
 	
 	/**
 	 * @class BaseEventEmitter
@@ -23294,7 +23622,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 3)))
 
 /***/ },
-/* 185 */
+/* 191 */
 /*!************************************************!*\
   !*** ./~/fbemitter/lib/EmitterSubscription.js ***!
   \************************************************/
@@ -23318,7 +23646,7 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
-	var EventSubscription = __webpack_require__(/*! ./EventSubscription */ 186);
+	var EventSubscription = __webpack_require__(/*! ./EventSubscription */ 192);
 	
 	/**
 	 * EmitterSubscription represents a subscription with listener and context data.
@@ -23350,7 +23678,7 @@
 	module.exports = EmitterSubscription;
 
 /***/ },
-/* 186 */
+/* 192 */
 /*!**********************************************!*\
   !*** ./~/fbemitter/lib/EventSubscription.js ***!
   \**********************************************/
@@ -23407,7 +23735,7 @@
 	module.exports = EventSubscription;
 
 /***/ },
-/* 187 */
+/* 193 */
 /*!****************************************************!*\
   !*** ./~/fbemitter/lib/EventSubscriptionVendor.js ***!
   \****************************************************/
@@ -23429,7 +23757,7 @@
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 	
-	var invariant = __webpack_require__(/*! fbjs/lib/invariant */ 188);
+	var invariant = __webpack_require__(/*! fbjs/lib/invariant */ 194);
 	
 	/**
 	 * EventSubscriptionVendor stores a set of EventSubscriptions that are
@@ -23519,7 +23847,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 3)))
 
 /***/ },
-/* 188 */
+/* 194 */
 /*!*********************************************!*\
   !*** ./~/fbemitter/~/fbjs/lib/invariant.js ***!
   \*********************************************/
@@ -23577,7 +23905,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 3)))
 
 /***/ },
-/* 189 */
+/* 195 */
 /*!*************************************************!*\
   !*** ./~/fbemitter/~/fbjs/lib/emptyFunction.js ***!
   \*************************************************/
@@ -23622,7 +23950,7 @@
 	module.exports = emptyFunction;
 
 /***/ },
-/* 190 */
+/* 196 */
 /*!**************************************!*\
   !*** ./~/flux/lib/abstractMethod.js ***!
   \**************************************/
@@ -23642,7 +23970,7 @@
 	
 	'use strict';
 	
-	var invariant = __webpack_require__(/*! fbjs/lib/invariant */ 178);
+	var invariant = __webpack_require__(/*! fbjs/lib/invariant */ 180);
 	
 	function abstractMethod(className, methodName) {
 	   true ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Subclasses of %s must override %s() with their own implementation.', className, methodName) : invariant(false) : undefined;
@@ -23652,7 +23980,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 3)))
 
 /***/ },
-/* 191 */
+/* 197 */
 /*!***************************************!*\
   !*** ./~/immutable/dist/immutable.js ***!
   \***************************************/
@@ -28639,7 +28967,7 @@
 	}));
 
 /***/ },
-/* 192 */
+/* 198 */
 /*!***************************************!*\
   !*** ./~/flux/lib/FluxMixinLegacy.js ***!
   \***************************************/
@@ -28659,9 +28987,9 @@
 	
 	'use strict';
 	
-	var FluxStoreGroup = __webpack_require__(/*! ./FluxStoreGroup */ 177);
+	var FluxStoreGroup = __webpack_require__(/*! ./FluxStoreGroup */ 184);
 	
-	var invariant = __webpack_require__(/*! fbjs/lib/invariant */ 178);
+	var invariant = __webpack_require__(/*! fbjs/lib/invariant */ 180);
 	
 	/**
 	 * `FluxContainer` should be preferred over this mixin, but it requires using
@@ -28765,394 +29093,17 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 3)))
 
 /***/ },
-/* 193 */
-/*!**************************************************!*\
-  !*** ./frontend/actions/MunicipisActionNames.js ***!
-  \**************************************************/
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	module.exports = {
-	
-	  SELECT_MUNICIPI: 'SELECT_MUNICIPI',
-	  FETCH_MUNICIPIS: 'FETCH_MUNICIPIS',
-	  RECEIVE_MUNICIPIS: 'RECEIVE_MUNICIPIS'
-	
-	};
-
-/***/ },
-/* 194 */
-/*!**********************************************!*\
-  !*** ./frontend/actions/MunicipisActions.js ***!
-  \**********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var actionConstants = __webpack_require__(/*! ./MunicipisActionNames */ 193);
-	var AppDispatcher = __webpack_require__(/*! ../dispatcher/AppDispatcher */ 195);
-	
-	module.exports = {
-	
-	  selectMunicipi: function selectMunicipi(municipi) {
-	    AppDispatcher.dispatch({
-	      type: actionConstants.SELECT_MUNICIPI,
-	      municipi: municipi
-	    });
-	  },
-	
-	  fetchMunicipis: function fetchMunicipis() {
-	    AppDispatcher.dispatch({
-	      type: actionConstants.FETCH_MUNICIPIS
-	    });
-	  },
-	
-	  receiveMunicipis: function receiveMunicipis(municipis) {
-	    AppDispatcher.dispatch({
-	      type: actionConstants.RECEIVE_MUNICIPIS,
-	      municipis: municipis
-	    });
-	  }
-	};
-
-/***/ },
-/* 195 */
-/*!**********************************************!*\
-  !*** ./frontend/dispatcher/AppDispatcher.js ***!
-  \**********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var _flux = __webpack_require__(/*! flux */ 196);
-	
-	var AppDispatcher = new _flux.Dispatcher();
-	module.exports = AppDispatcher;
-
-/***/ },
-/* 196 */
-/*!*************************!*\
-  !*** ./~/flux/index.js ***!
-  \*************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Copyright (c) 2014-2015, Facebook, Inc.
-	 * All rights reserved.
-	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
-	 */
-	
-	module.exports.Dispatcher = __webpack_require__(/*! ./lib/Dispatcher */ 197);
-
-
-/***/ },
-/* 197 */
-/*!**********************************!*\
-  !*** ./~/flux/lib/Dispatcher.js ***!
-  \**********************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(process) {/**
-	 * Copyright (c) 2014-2015, Facebook, Inc.
-	 * All rights reserved.
-	 *
-	 * This source code is licensed under the BSD-style license found in the
-	 * LICENSE file in the root directory of this source tree. An additional grant
-	 * of patent rights can be found in the PATENTS file in the same directory.
-	 *
-	 * @providesModule Dispatcher
-	 * 
-	 * @preventMunge
-	 */
-	
-	'use strict';
-	
-	exports.__esModule = true;
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-	
-	var invariant = __webpack_require__(/*! fbjs/lib/invariant */ 178);
-	
-	var _prefix = 'ID_';
-	
-	/**
-	 * Dispatcher is used to broadcast payloads to registered callbacks. This is
-	 * different from generic pub-sub systems in two ways:
-	 *
-	 *   1) Callbacks are not subscribed to particular events. Every payload is
-	 *      dispatched to every registered callback.
-	 *   2) Callbacks can be deferred in whole or part until other callbacks have
-	 *      been executed.
-	 *
-	 * For example, consider this hypothetical flight destination form, which
-	 * selects a default city when a country is selected:
-	 *
-	 *   var flightDispatcher = new Dispatcher();
-	 *
-	 *   // Keeps track of which country is selected
-	 *   var CountryStore = {country: null};
-	 *
-	 *   // Keeps track of which city is selected
-	 *   var CityStore = {city: null};
-	 *
-	 *   // Keeps track of the base flight price of the selected city
-	 *   var FlightPriceStore = {price: null}
-	 *
-	 * When a user changes the selected city, we dispatch the payload:
-	 *
-	 *   flightDispatcher.dispatch({
-	 *     actionType: 'city-update',
-	 *     selectedCity: 'paris'
-	 *   });
-	 *
-	 * This payload is digested by `CityStore`:
-	 *
-	 *   flightDispatcher.register(function(payload) {
-	 *     if (payload.actionType === 'city-update') {
-	 *       CityStore.city = payload.selectedCity;
-	 *     }
-	 *   });
-	 *
-	 * When the user selects a country, we dispatch the payload:
-	 *
-	 *   flightDispatcher.dispatch({
-	 *     actionType: 'country-update',
-	 *     selectedCountry: 'australia'
-	 *   });
-	 *
-	 * This payload is digested by both stores:
-	 *
-	 *   CountryStore.dispatchToken = flightDispatcher.register(function(payload) {
-	 *     if (payload.actionType === 'country-update') {
-	 *       CountryStore.country = payload.selectedCountry;
-	 *     }
-	 *   });
-	 *
-	 * When the callback to update `CountryStore` is registered, we save a reference
-	 * to the returned token. Using this token with `waitFor()`, we can guarantee
-	 * that `CountryStore` is updated before the callback that updates `CityStore`
-	 * needs to query its data.
-	 *
-	 *   CityStore.dispatchToken = flightDispatcher.register(function(payload) {
-	 *     if (payload.actionType === 'country-update') {
-	 *       // `CountryStore.country` may not be updated.
-	 *       flightDispatcher.waitFor([CountryStore.dispatchToken]);
-	 *       // `CountryStore.country` is now guaranteed to be updated.
-	 *
-	 *       // Select the default city for the new country
-	 *       CityStore.city = getDefaultCityForCountry(CountryStore.country);
-	 *     }
-	 *   });
-	 *
-	 * The usage of `waitFor()` can be chained, for example:
-	 *
-	 *   FlightPriceStore.dispatchToken =
-	 *     flightDispatcher.register(function(payload) {
-	 *       switch (payload.actionType) {
-	 *         case 'country-update':
-	 *         case 'city-update':
-	 *           flightDispatcher.waitFor([CityStore.dispatchToken]);
-	 *           FlightPriceStore.price =
-	 *             getFlightPriceStore(CountryStore.country, CityStore.city);
-	 *           break;
-	 *     }
-	 *   });
-	 *
-	 * The `country-update` payload will be guaranteed to invoke the stores'
-	 * registered callbacks in order: `CountryStore`, `CityStore`, then
-	 * `FlightPriceStore`.
-	 */
-	
-	var Dispatcher = (function () {
-	  function Dispatcher() {
-	    _classCallCheck(this, Dispatcher);
-	
-	    this._callbacks = {};
-	    this._isDispatching = false;
-	    this._isHandled = {};
-	    this._isPending = {};
-	    this._lastID = 1;
-	  }
-	
-	  /**
-	   * Registers a callback to be invoked with every dispatched payload. Returns
-	   * a token that can be used with `waitFor()`.
-	   */
-	
-	  Dispatcher.prototype.register = function register(callback) {
-	    var id = _prefix + this._lastID++;
-	    this._callbacks[id] = callback;
-	    return id;
-	  };
-	
-	  /**
-	   * Removes a callback based on its token.
-	   */
-	
-	  Dispatcher.prototype.unregister = function unregister(id) {
-	    !this._callbacks[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id) : invariant(false) : undefined;
-	    delete this._callbacks[id];
-	  };
-	
-	  /**
-	   * Waits for the callbacks specified to be invoked before continuing execution
-	   * of the current callback. This method should only be used by a callback in
-	   * response to a dispatched payload.
-	   */
-	
-	  Dispatcher.prototype.waitFor = function waitFor(ids) {
-	    !this._isDispatching ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): Must be invoked while dispatching.') : invariant(false) : undefined;
-	    for (var ii = 0; ii < ids.length; ii++) {
-	      var id = ids[ii];
-	      if (this._isPending[id]) {
-	        !this._isHandled[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id) : invariant(false) : undefined;
-	        continue;
-	      }
-	      !this._callbacks[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id) : invariant(false) : undefined;
-	      this._invokeCallback(id);
-	    }
-	  };
-	
-	  /**
-	   * Dispatches a payload to all registered callbacks.
-	   */
-	
-	  Dispatcher.prototype.dispatch = function dispatch(payload) {
-	    !!this._isDispatching ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.') : invariant(false) : undefined;
-	    this._startDispatching(payload);
-	    try {
-	      for (var id in this._callbacks) {
-	        if (this._isPending[id]) {
-	          continue;
-	        }
-	        this._invokeCallback(id);
-	      }
-	    } finally {
-	      this._stopDispatching();
-	    }
-	  };
-	
-	  /**
-	   * Is this Dispatcher currently dispatching.
-	   */
-	
-	  Dispatcher.prototype.isDispatching = function isDispatching() {
-	    return this._isDispatching;
-	  };
-	
-	  /**
-	   * Call the callback stored with the given id. Also do some internal
-	   * bookkeeping.
-	   *
-	   * @internal
-	   */
-	
-	  Dispatcher.prototype._invokeCallback = function _invokeCallback(id) {
-	    this._isPending[id] = true;
-	    this._callbacks[id](this._pendingPayload);
-	    this._isHandled[id] = true;
-	  };
-	
-	  /**
-	   * Set up bookkeeping needed when dispatching.
-	   *
-	   * @internal
-	   */
-	
-	  Dispatcher.prototype._startDispatching = function _startDispatching(payload) {
-	    for (var id in this._callbacks) {
-	      this._isPending[id] = false;
-	      this._isHandled[id] = false;
-	    }
-	    this._pendingPayload = payload;
-	    this._isDispatching = true;
-	  };
-	
-	  /**
-	   * Clear bookkeeping used for dispatching.
-	   *
-	   * @internal
-	   */
-	
-	  Dispatcher.prototype._stopDispatching = function _stopDispatching() {
-	    delete this._pendingPayload;
-	    this._isDispatching = false;
-	  };
-	
-	  return Dispatcher;
-	})();
-	
-	module.exports = Dispatcher;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(/*! ./~/process/browser.js */ 3)))
-
-/***/ },
-/* 198 */
-/*!**********************************************!*\
-  !*** ./frontend/components/DadesMunicipi.js ***!
-  \**********************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var React = __webpack_require__(/*! react */ 1);
-	
-	var DadesMunicipi = React.createClass({
-	  displayName: 'DadesMunicipi',
-	
-	
-	  render: function render() {
-	
-	    if (!this.props.municipi) {
-	      return React.createElement(
-	        'div',
-	        null,
-	        'Loading...'
-	      );
-	    }
-	
-	    return React.createElement(
-	      'div',
-	      null,
-	      React.createElement(
-	        'h3',
-	        null,
-	        'Codi:'
-	      ),
-	      this.props.municipi.codi,
-	      React.createElement(
-	        'h3',
-	        null,
-	        'Dia1:'
-	      ),
-	      this.props.municipi.dies[0].variables.precipitacio.valor,
-	      React.createElement(
-	        'h3',
-	        null,
-	        'Dia2:'
-	      ),
-	      this.props.municipi.dies[1].variables.precipitacio.valor
-	    );
-	  }
-	});
-	
-	module.exports = DadesMunicipi;
-
-/***/ },
 /* 199 */
-/*!******************************************!*\
-  !*** ./frontend/stores/MunicipiStore.js ***!
-  \******************************************/
+/*!*******************************************!*\
+  !*** ./frontend/stores/MunicipisStore.js ***!
+  \*******************************************/
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	var _utils = __webpack_require__(/*! flux/utils */ 175);
+	var _utils = __webpack_require__(/*! flux/utils */ 182);
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
@@ -29160,32 +29111,45 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
-	var actionNames = __webpack_require__(/*! ../actions/MunicipisActionNames */ 193);
-	var actions = __webpack_require__(/*! ../actions/MunicipisActions */ 194);
-	var AppDispatcher = __webpack_require__(/*! ../dispatcher/AppDispatcher */ 195);
-	var municipisStore = __webpack_require__(/*! ./MunicipisStore */ 174);
+	var actionNames = __webpack_require__(/*! ../actions/MunicipisActionNames */ 176);
+	var actions = __webpack_require__(/*! ../actions/MunicipisActions */ 175);
+	var AppDispatcher = __webpack_require__(/*! ../dispatcher/AppDispatcher */ 177);
 	
-	var MunicipiStore = function (_Store) {
-	  _inherits(MunicipiStore, _Store);
+	var MunicipisStore = function (_Store) {
+	  _inherits(MunicipisStore, _Store);
 	
-	  function MunicipiStore(dispatcher) {
-	    _classCallCheck(this, MunicipiStore);
+	  function MunicipisStore(dispatcher) {
+	    _classCallCheck(this, MunicipisStore);
 	
-	    var _this = _possibleConstructorReturn(this, (MunicipiStore.__proto__ || Object.getPrototypeOf(MunicipiStore)).call(this, dispatcher));
+	    var _this = _possibleConstructorReturn(this, (MunicipisStore.__proto__ || Object.getPrototypeOf(MunicipisStore)).call(this, dispatcher));
 	
-	    _this.selectedMunicipi = {};
+	    _this.municipis = [];
 	    return _this;
 	  }
 	
-	  _createClass(MunicipiStore, [{
-	    key: 'getSelectedMunicipi',
-	    value: function getSelectedMunicipi() {
-	      return this.selectedMunicipi;
+	  _createClass(MunicipisStore, [{
+	    key: 'getMunicipis',
+	    value: function getMunicipis() {
+	      return this.municipis;
 	    }
 	  }, {
-	    key: 'selectMunicipi',
-	    value: function selectMunicipi(municipi) {
-	      this.selectedMunicipi = municipi;
+	    key: 'getDefaultMunicipi',
+	    value: function getDefaultMunicipi() {
+	      return this.municipis[0];
+	    }
+	  }, {
+	    key: 'fetchMunicipis',
+	    value: function fetchMunicipis() {
+	      fetch('/municipis/metadades').then(function (response) {
+	        return response.json();
+	      }).then(function (receivedMetadata) {
+	        actions.receiveMunicipis(receivedMetadata);
+	      });
+	    }
+	  }, {
+	    key: 'receiveMunicipis',
+	    value: function receiveMunicipis(newMunicipis) {
+	      this.municipis = newMunicipis;
 	    }
 	
 	    // Overriden method given by Flux library Store 
@@ -29196,18 +29160,22 @@
 	
 	      switch (action.type) {
 	
-	        case actionNames.SELECT_MUNICIPI:
-	          this.selectMunicipi(action.municipi);
+	        case actionNames.FETCH_MUNICIPIS:
+	          this.fetchMunicipis();
+	          break;
+	
+	        case actionNames.RECEIVE_MUNICIPIS:
+	          this.receiveMunicipis(action.municipis);
 	          this.__emitChange();
 	          break;
 	      }
 	    }
 	  }]);
 	
-	  return MunicipiStore;
+	  return MunicipisStore;
 	}(_utils.Store);
 	
-	var instance = new MunicipiStore(AppDispatcher);
+	var instance = new MunicipisStore(AppDispatcher);
 	module.exports = instance;
 
 /***/ }

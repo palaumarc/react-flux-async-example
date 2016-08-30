@@ -9,15 +9,15 @@ class MunicipiStore extends Store {
 
   constructor(dispatcher) {
     super(dispatcher);
-    this.selectedMunicipi = {};
+    this.selectedMunicipiCodi = '';
   }
 
-  getSelectedMunicipi() {
-    return this.selectedMunicipi;
+  getSelectedMunicipiCodi() {
+    return this.selectedMunicipiCodi;
   }
 
-  selectMunicipi(municipi) {
-    this.selectedMunicipi = municipi;
+  selectMunicipi(codiMunicipi) {
+    this.selectedMunicipiCodi = codiMunicipi;
   }
 
   // Overriden method given by Flux library Store 
@@ -26,7 +26,7 @@ class MunicipiStore extends Store {
     switch(action.type) {
 
       case actionNames.SELECT_MUNICIPI:
-        this.selectMunicipi(action.municipi);
+        this.selectMunicipi(action.codiMunicipi);
         this.__emitChange();
         break;
     }

@@ -3,10 +3,10 @@ var AppDispatcher = require('../dispatcher/AppDispatcher');
 
 module.exports = {
   
-  selectMunicipi: function(municipi) {
+  selectMunicipi: function(codiMunicipi) {
     AppDispatcher.dispatch ({
       type: actionConstants.SELECT_MUNICIPI,
-      municipi
+      codiMunicipi
     });
   },
 
