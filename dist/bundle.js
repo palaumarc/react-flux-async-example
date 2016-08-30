@@ -21976,7 +21976,7 @@
 	  getInitialState: function getInitialState() {
 	    return {
 	      municipis: municipisStore.getMunicipis(),
-	      selectedMunicipiCodi: municipiStore.getSelectedMunicipiCodi()
+	      selectedMunicipisCodi: municipiStore.getSelectedMunicipisCodi()
 	    };
 	  },
 	
@@ -21993,14 +21993,13 @@
 	
 	  updateSelectedMunicipi: function updateSelectedMunicipi() {
 	    this.setState({
-	      selectedMunicipiCodi: municipiStore.getSelectedMunicipiCodi()
+	      selectedMunicipisCodi: municipiStore.getSelectedMunicipisCodi()
 	    });
 	  },
 	
 	  updateMunicipis: function updateMunicipis() {
 	    this.setState({
-	      municipis: municipisStore.getMunicipis(),
-	      selectedMunicipiCodi: municipisStore.getMunicipis()[0].codi
+	      municipis: municipisStore.getMunicipis()
 	    });
 	  },
 	
@@ -22017,7 +22016,8 @@
 	    return React.createElement(
 	      'div',
 	      null,
-	      React.createElement(Municipi, { municipis: this.state.municipis, selectedMunicipiCodi: this.state.selectedMunicipiCodi })
+	      React.createElement(Municipi, { selectorId: 0, municipis: this.state.municipis, selectedMunicipiCodi: this.state.selectedMunicipisCodi[0] }),
+	      React.createElement(Municipi, { selectorId: 1, municipis: this.state.municipis, selectedMunicipiCodi: this.state.selectedMunicipisCodi[1] })
 	    );
 	  }
 	});
@@ -22036,8 +22036,6 @@
 	var React = __webpack_require__(/*! react */ 1);
 	var DadesMunicipi = __webpack_require__(/*! ./DadesMunicipi */ 174);
 	var actions = __webpack_require__(/*! ../actions/MunicipisActions */ 175);
-	var municipiStore = __webpack_require__(/*! ../stores/MunicipiStore */ 181);
-	var municipisStore = __webpack_require__(/*! ../stores/MunicipisStore */ 199);
 	
 	var Municipi = React.createClass({
 	  displayName: 'Municipi',
@@ -22045,7 +22043,7 @@
 	
 	  selectChangeHandler: function selectChangeHandler(e) {
 	    var selectedMunicipiCodi = e.target.value;
-	    actions.selectMunicipi(selectedMunicipiCodi);
+	    actions.selectMunicipi(this.props.selectorId, selectedMunicipiCodi);
 	  },
 	
 	  render: function render() {
@@ -22058,7 +22056,7 @@
 	    var listItems = this.props.municipis.map(function (municipi, index) {
 	
 	      if (municipi.codi === _this.props.selectedMunicipiCodi) {
-	        defaultSelectValue = index;
+	        defaultSelectValue = municipi.codi;
 	        nomComarca = municipi.comarca.nom;
 	      }
 	
@@ -22079,7 +22077,7 @@
 	      ),
 	      React.createElement(
 	        'select',
-	        { defaultValue: defaultSelectValue, onChange: this.selectChangeHandler },
+	        { value: defaultSelectValue, onChange: this.selectChangeHandler },
 	        listItems
 	      ),
 	      React.createElement(
@@ -22160,10 +22158,11 @@
 	
 	module.exports = {
 	
-	  selectMunicipi: function selectMunicipi(codiMunicipi) {
+	  selectMunicipi: function selectMunicipi(selectorId, codiMunicipi) {
 	    AppDispatcher.dispatch({
 	      type: actionConstants.SELECT_MUNICIPI,
-	      codiMunicipi: codiMunicipi
+	      codiMunicipi: codiMunicipi,
+	      selectorId: selectorId
 	    });
 	  },
 	
@@ -22561,19 +22560,26 @@
 	
 	    var _this = _possibleConstructorReturn(this, (MunicipiStore.__proto__ || Object.getPrototypeOf(MunicipiStore)).call(this, dispatcher));
 	
-	    _this.selectedMunicipiCodi = '';
+	    _this.selectedMunicipisCodi = {};
 	    return _this;
 	  }
 	
 	  _createClass(MunicipiStore, [{
-	    key: 'getSelectedMunicipiCodi',
-	    value: function getSelectedMunicipiCodi() {
-	      return this.selectedMunicipiCodi;
+	    key: 'getSelectedMunicipisCodi',
+	    value: function getSelectedMunicipisCodi() {
+	      return this.selectedMunicipisCodi;
 	    }
 	  }, {
 	    key: 'selectMunicipi',
-	    value: function selectMunicipi(codiMunicipi) {
-	      this.selectedMunicipiCodi = codiMunicipi;
+	    value: function selectMunicipi(selectorId, codiMunicipi) {
+	      this.selectedMunicipisCodi[selectorId] = codiMunicipi;
+	    }
+	  }, {
+	    key: 'setDefaultSelectedMunicipis',
+	    value: function setDefaultSelectedMunicipis(municipis) {
+	      for (var i = 0; i < 2; i++) {
+	        this.selectedMunicipisCodi[i] = municipis[i].codi;
+	      }
 	    }
 	
 	    // Overriden method given by Flux library Store 
@@ -22585,7 +22591,12 @@
 	      switch (action.type) {
 	
 	        case actionNames.SELECT_MUNICIPI:
-	          this.selectMunicipi(action.codiMunicipi);
+	          this.selectMunicipi(action.selectorId, action.codiMunicipi);
+	          this.__emitChange();
+	          break;
+	
+	        case actionNames.RECEIVE_MUNICIPIS:
+	          this.setDefaultSelectedMunicipis(action.municipis);
 	          this.__emitChange();
 	          break;
 	      }
@@ -29131,11 +29142,6 @@
 	    key: 'getMunicipis',
 	    value: function getMunicipis() {
 	      return this.municipis;
-	    }
-	  }, {
-	    key: 'getDefaultMunicipi',
-	    value: function getDefaultMunicipi() {
-	      return this.municipis[0];
 	    }
 	  }, {
 	    key: 'fetchMunicipis',

@@ -9,15 +9,21 @@ class MunicipiStore extends Store {
 
   constructor(dispatcher) {
     super(dispatcher);
-    this.selectedMunicipiCodi = '';
+    this.selectedMunicipisCodi = {};
   }
 
-  getSelectedMunicipiCodi() {
-    return this.selectedMunicipiCodi;
+  getSelectedMunicipisCodi() {
+    return this.selectedMunicipisCodi;
   }
 
-  selectMunicipi(codiMunicipi) {
-    this.selectedMunicipiCodi = codiMunicipi;
+  selectMunicipi(selectorId, codiMunicipi) {
+    this.selectedMunicipisCodi[selectorId] = codiMunicipi;
+  }
+
+  setDefaultSelectedMunicipis(municipis) {
+    for (var i = 0; i < 2; i++) {
+      this.selectedMunicipisCodi[i] = municipis[i].codi;
+    }
   }
 
   // Overriden method given by Flux library Store 
@@ -26,7 +32,12 @@ class MunicipiStore extends Store {
     switch(action.type) {
 
       case actionNames.SELECT_MUNICIPI:
-        this.selectMunicipi(action.codiMunicipi);
+        this.selectMunicipi(action.selectorId, action.codiMunicipi);
+        this.__emitChange();
+        break;
+
+      case actionNames.RECEIVE_MUNICIPIS:
+        this.setDefaultSelectedMunicipis(action.municipis);
         this.__emitChange();
         break;
     }

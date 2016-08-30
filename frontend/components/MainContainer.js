@@ -4,12 +4,13 @@ var municipisStore = require('../stores/MunicipisStore');
 var municipiStore = require('../stores/MunicipiStore');
 var actions = require('../actions/MunicipisActions');
 
+
 var MainContainer = React.createClass({
 
   getInitialState: function() {
     return {
       municipis: municipisStore.getMunicipis(),
-      selectedMunicipiCodi: municipiStore.getSelectedMunicipiCodi()
+      selectedMunicipisCodi: municipiStore.getSelectedMunicipisCodi()
     }
   },
 
@@ -26,14 +27,13 @@ var MainContainer = React.createClass({
 
   updateSelectedMunicipi: function() {
     this.setState({
-      selectedMunicipiCodi: municipiStore.getSelectedMunicipiCodi()
+      selectedMunicipisCodi: municipiStore.getSelectedMunicipisCodi()
     })
   },
 
   updateMunicipis: function() {
     this.setState({
-      municipis: municipisStore.getMunicipis(),
-      selectedMunicipiCodi: municipisStore.getMunicipis()[0].codi
+      municipis: municipisStore.getMunicipis()
     })
   },
 
@@ -49,8 +49,8 @@ var MainContainer = React.createClass({
 
     return (
       <div>
-        <Municipi municipis={this.state.municipis} selectedMunicipiCodi={this.state.selectedMunicipiCodi}/>
-        {/*<Municipi municipis={this.state.municipis} />*/}
+        <Municipi selectorId={0} municipis={this.state.municipis} selectedMunicipiCodi={this.state.selectedMunicipisCodi[0]}/>
+        <Municipi selectorId={1} municipis={this.state.municipis} selectedMunicipiCodi={this.state.selectedMunicipisCodi[1]}/>
       </div>
     )
   }

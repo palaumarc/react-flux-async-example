@@ -15,10 +15,6 @@ class MunicipisStore extends Store {
     return this.municipis;
   }
 
-  getDefaultMunicipi() {
-    return this.municipis[0];
-  }
-
   fetchMunicipis() {
     fetch('/municipis/metadades')
     .then((response) => {
