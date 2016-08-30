@@ -21989,9 +21989,11 @@
 	  },
 	
 	  render: function render() {
+	
 	    return React.createElement(
 	      'div',
 	      null,
+	      React.createElement(Municipi, { municipis: this.state.municipis }),
 	      React.createElement(Municipi, { municipis: this.state.municipis })
 	    );
 	  }
@@ -22017,11 +22019,22 @@
 	
 	  getInitialState: function getInitialState() {
 	    return {
-	      selectedMunicipi: this.props.municipis[0]
+	      selectedMunicipiPrediccio: this.props.municipis[0],
+	      selectedMunicipi: {}
 	    };
 	  },
 	
 	  componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+	    var _this = this;
+	
+	    fetch('/municipis/' + nextProps.municipis[0].codi).then(function (response) {
+	      return response.json();
+	    }).then(function (prediccio) {
+	      _this.setState({
+	        selectedMunicipiPrediccio: prediccio
+	      });
+	    });
+	
 	    this.setState({
 	      selectedMunicipi: nextProps.municipis[0]
 	    });
@@ -22029,29 +22042,40 @@
 	
 	
 	  selectChangeHandler: function selectChangeHandler(e) {
-	    var selectedMunicipiId = e.target.value;
-	    var selectedMunicipi = this.props.municipis.filter(function (municipi) {
-	      return municipi.codi === selectedMunicipiId;
+	    var _this2 = this;
+	
+	    var indexOfSelectedMunicipi = e.target.value;
+	
+	    fetch('/municipis/' + this.props.municipis[indexOfSelectedMunicipi].codi).then(function (response) {
+	      return response.json();
+	    }).then(function (prediccio) {
+	      _this2.setState({
+	        selectedMunicipiPrediccio: prediccio
+	      });
 	    });
 	
 	    this.setState({
-	      selectedMunicipi: selectedMunicipi[0]
+	      selectedMunicipi: this.props.municipis[indexOfSelectedMunicipi]
 	    });
 	  },
 	
 	  render: function render() {
 	
+	    var divStyle = { float: 'left' };
+	
 	    var listItems = this.props.municipis.map(function (municipi, index) {
 	      return React.createElement(
 	        'option',
-	        { key: index, value: municipi.codi },
+	        { key: index, value: index },
 	        municipi.nom
 	      );
 	    });
 	
+	    var nomComarca = this.state.selectedMunicipi.comarca ? this.state.selectedMunicipi.comarca.nom : '';
+	
 	    return React.createElement(
 	      'div',
-	      null,
+	      { style: divStyle },
 	      React.createElement(
 	        'h2',
 	        null,
@@ -22062,7 +22086,13 @@
 	        { onChange: this.selectChangeHandler },
 	        listItems
 	      ),
-	      React.createElement(DadesMunicipi, { municipi: this.state.selectedMunicipi })
+	      React.createElement(
+	        'h2',
+	        null,
+	        'Comarca:'
+	      ),
+	      nomComarca,
+	      React.createElement(DadesMunicipi, { municipi: this.state.selectedMunicipiPrediccio })
 	    );
 	  }
 	});
@@ -22100,21 +22130,21 @@
 	      React.createElement(
 	        'h3',
 	        null,
-	        'Nom:'
-	      ),
-	      this.props.municipi.nom,
-	      React.createElement(
-	        'h3',
-	        null,
-	        'Comarca:'
-	      ),
-	      this.props.municipi.comarca.nom,
-	      React.createElement(
-	        'h3',
-	        null,
 	        'Codi:'
 	      ),
-	      this.props.municipi.codi
+	      this.props.municipi.codi,
+	      React.createElement(
+	        'h3',
+	        null,
+	        'Dia1:'
+	      ),
+	      this.props.municipi.dies[0].data,
+	      React.createElement(
+	        'h3',
+	        null,
+	        'Dia2:'
+	      ),
+	      this.props.municipi.dies[1].data
 	    );
 	  }
 	});

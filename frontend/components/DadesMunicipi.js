@@ -14,12 +14,12 @@ var DadesMunicipi = React.createClass({
 
     return (
       <div>
-        <h3>Nom:</h3>
-        {this.props.municipi.nom}
-        <h3>Comarca:</h3>
-        {this.props.municipi.comarca.nom}
         <h3>Codi:</h3>
         {this.props.municipi.codi}
+        <h3>Dia1:</h3>
+        {this.props.municipi.dies[0].data}
+        <h3>Dia2:</h3>
+        {this.props.municipi.dies[1].data}
       </div>
     )
   }

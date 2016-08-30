@@ -22,8 +22,10 @@ var MainContainer = React.createClass({
   },
 
   render: function() {
+
     return (
       <div>
+        <Municipi municipis={this.state.municipis} />
         <Municipi municipis={this.state.municipis} />
       </div>
     )

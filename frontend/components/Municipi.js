@@ -5,40 +5,64 @@ var Municipi = React.createClass({
 
   getInitialState: function() {
     return {
-      selectedMunicipi: this.props.municipis[0]
+      selectedMunicipiPrediccio: this.props.municipis[0],
+      selectedMunicipi: {}
     }
   },
 
   componentWillReceiveProps(nextProps) {
+    fetch('/municipis/' + nextProps.municipis[0].codi)
+    .then((response) => {
+      return response.json();
+    })
+    .then((prediccio) => {
+      this.setState({
+        selectedMunicipiPrediccio: prediccio
+      })
+    });
+
     this.setState({
       selectedMunicipi: nextProps.municipis[0]
     })
   },
 
   selectChangeHandler: function(e) {
-    var selectedMunicipiId = e.target.value;
-    var selectedMunicipi = this.props.municipis.filter(function(municipi) {
-      return municipi.codi === selectedMunicipiId;
+    var indexOfSelectedMunicipi = e.target.value;
+
+    fetch('/municipis/' + this.props.municipis[indexOfSelectedMunicipi].codi)
+    .then((response) => {
+      return response.json();
     })
+    .then((prediccio) => {
+      this.setState({
+        selectedMunicipiPrediccio: prediccio
+      })
+    });
 
     this.setState({
-      selectedMunicipi: selectedMunicipi[0]
+      selectedMunicipi: this.props.municipis[indexOfSelectedMunicipi]
     })
   },
 
   render: function() {
 
+    var divStyle = { float : 'left' };
+
     var listItems = this.props.municipis.map((municipi, index) => (
-      <option key={index} value={municipi.codi}>{municipi.nom}</option>
+      <option key={index} value={index}>{municipi.nom}</option>
     ));
 
+    var nomComarca = this.state.selectedMunicipi.comarca ? this.state.selectedMunicipi.comarca.nom : '';
+
     return (
-      <div>
+      <div style={divStyle}>
         <h2>Municipi:</h2>
         <select onChange={this.selectChangeHandler}>
           {listItems}
         </select>
-        <DadesMunicipi municipi={this.state.selectedMunicipi}/>
+        <h2>Comarca:</h2>
+        {nomComarca}
+        <DadesMunicipi municipi={this.state.selectedMunicipiPrediccio}/>
       </div>
     )
   }
