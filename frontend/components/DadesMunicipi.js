@@ -17,9 +17,9 @@ var DadesMunicipi = React.createClass({
         <h3>Codi:</h3>
         {this.props.municipi.codi}
         <h3>Dia1:</h3>
-        {this.props.municipi.dies[0].data}
+        {this.props.municipi.dies[0].variables.precipitacio.valor}
         <h3>Dia2:</h3>
-        {this.props.municipi.dies[1].data}
+        {this.props.municipi.dies[1].variables.precipitacio.valor}
       </div>
     )
   }

@@ -1,13 +1,24 @@
 var React = require('react');
-var DadesMunicipi = require('./DadesMunicipi')
+var DadesMunicipi = require('./DadesMunicipi');
+var actions = require('../actions/MunicipisActions');
+var municipiStore = require('../stores/MunicipiStore');
+var municipisStore = require('../stores/MunicipisStore');
 
 var Municipi = React.createClass({
 
   getInitialState: function() {
     return {
       selectedMunicipiPrediccio: this.props.municipis[0],
-      selectedMunicipi: {}
+      selectedMunicipi: municipisStore.getDefaultMunicipi()
     }
+  },
+
+  componentDidMount: function() {
+    this.municipiStoreRemoveToken = municipiStore.addListener(this.updateSelectedMunicipi);
+  },
+
+  componentWillUnmount: function() {
+    this.municipiStoreRemoveToken.remove();
   },
 
   componentWillReceiveProps(nextProps) {
@@ -20,13 +31,16 @@ var Municipi = React.createClass({
         selectedMunicipiPrediccio: prediccio
       })
     });
+  },
 
+  updateSelectedMunicipi: function() {
     this.setState({
-      selectedMunicipi: nextProps.municipis[0]
+      selectedMunicipi: municipiStore.getSelectedMunicipi()
     })
   },
 
   selectChangeHandler: function(e) {
+
     var indexOfSelectedMunicipi = e.target.value;
 
     fetch('/municipis/' + this.props.municipis[indexOfSelectedMunicipi].codi)
@@ -39,30 +53,34 @@ var Municipi = React.createClass({
       })
     });
 
-    this.setState({
-      selectedMunicipi: this.props.municipis[indexOfSelectedMunicipi]
-    })
+    actions.selectMunicipi(this.props.municipis[indexOfSelectedMunicipi]);
   },
 
   render: function() {
 
     var divStyle = { float : 'left' };
-
-    var listItems = this.props.municipis.map((municipi, index) => (
-      <option key={index} value={index}>{municipi.nom}</option>
-    ));
-
+    var defaultSelectValue = 0;
     var nomComarca = this.state.selectedMunicipi.comarca ? this.state.selectedMunicipi.comarca.nom : '';
+
+    var listItems = this.props.municipis.map((municipi, index) => {
+
+      if (municipi.codi === this.state.selectedMunicipi.codi) {
+        defaultSelectValue = index
+      }
+      return <option key={index} value={index}>{municipi.nom}</option>
+
+    });
+
 
     return (
       <div style={divStyle}>
         <h2>Municipi:</h2>
-        <select onChange={this.selectChangeHandler}>
+        <select defaultValue={defaultSelectValue} onChange={this.selectChangeHandler}>
           {listItems}
         </select>
         <h2>Comarca:</h2>
         {nomComarca}
-        <DadesMunicipi municipi={this.state.selectedMunicipiPrediccio}/>
+        {/*<DadesMunicipi municipi={this.state.selectedMunicipiPrediccio}/>*/}
       </div>
     )
   }
