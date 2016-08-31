@@ -29431,9 +29431,6 @@
 	  }, {
 	    key: 'setActiveDay',
 	    value: function setActiveDay(selectorId, indexOfActiveDay) {
-	      console.log("setActiveDay");
-	      console.log("selectorId", selectorId);
-	      console.log("indexOfActiveDay", indexOfActiveDay);
 	      this.indexOfActiveDay[selectorId] = indexOfActiveDay;
 	    }
 	

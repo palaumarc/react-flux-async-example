@@ -15,9 +15,6 @@ class ActiveDayStore extends Store {
   }
 
   setActiveDay(selectorId, indexOfActiveDay) {
-    console.log("setActiveDay");
-    console.log("selectorId", selectorId);
-    console.log("indexOfActiveDay", indexOfActiveDay);
     this.indexOfActiveDay[selectorId] = indexOfActiveDay;
   }
 
