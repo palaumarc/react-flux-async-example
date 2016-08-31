@@ -21965,10 +21965,10 @@
 	
 	var React = __webpack_require__(/*! react */ 1);
 	var Municipi = __webpack_require__(/*! ./Municipi */ 173);
-	var municipisStore = __webpack_require__(/*! ../stores/MunicipisStore */ 199);
-	var municipiStore = __webpack_require__(/*! ../stores/MunicipiStore */ 200);
+	var municipisStore = __webpack_require__(/*! ../stores/MunicipisStore */ 181);
+	var municipiStore = __webpack_require__(/*! ../stores/MunicipiStore */ 199);
 	var actions = __webpack_require__(/*! ../actions/MunicipisActions */ 175);
-	var prediccioStore = __webpack_require__(/*! ../stores/PrediccioStore */ 181);
+	var prediccioStore = __webpack_require__(/*! ../stores/PrediccioStore */ 200);
 	
 	var MainContainer = React.createClass({
 	  displayName: 'MainContainer',
@@ -22057,7 +22057,6 @@
 	var React = __webpack_require__(/*! react */ 1);
 	var PrediccioMunicipi = __webpack_require__(/*! ./PrediccioMunicipi */ 174);
 	var actions = __webpack_require__(/*! ../actions/MunicipisActions */ 175);
-	var prediccioStore = __webpack_require__(/*! ../stores/PrediccioStore */ 181);
 	
 	var Municipi = React.createClass({
 	  displayName: 'Municipi',
@@ -22566,7 +22565,7 @@
 /***/ },
 /* 181 */
 /*!*******************************************!*\
-  !*** ./frontend/stores/PrediccioStore.js ***!
+  !*** ./frontend/stores/MunicipisStore.js ***!
   \*******************************************/
 /***/ function(module, exports, __webpack_require__) {
 
@@ -22586,27 +22585,36 @@
 	var actions = __webpack_require__(/*! ../actions/MunicipisActions */ 175);
 	var AppDispatcher = __webpack_require__(/*! ../dispatcher/AppDispatcher */ 177);
 	
-	var MunicipiStore = function (_Store) {
-	  _inherits(MunicipiStore, _Store);
+	var MunicipisStore = function (_Store) {
+	  _inherits(MunicipisStore, _Store);
 	
-	  function MunicipiStore(dispatcher) {
-	    _classCallCheck(this, MunicipiStore);
+	  function MunicipisStore(dispatcher) {
+	    _classCallCheck(this, MunicipisStore);
 	
-	    var _this = _possibleConstructorReturn(this, (MunicipiStore.__proto__ || Object.getPrototypeOf(MunicipiStore)).call(this, dispatcher));
+	    var _this = _possibleConstructorReturn(this, (MunicipisStore.__proto__ || Object.getPrototypeOf(MunicipisStore)).call(this, dispatcher));
 	
-	    _this.prediccioMunicipi = {};
+	    _this.municipis = [];
 	    return _this;
 	  }
 	
-	  _createClass(MunicipiStore, [{
-	    key: 'getPrediccionsMunicipals',
-	    value: function getPrediccionsMunicipals() {
-	      return this.prediccioMunicipi;
+	  _createClass(MunicipisStore, [{
+	    key: 'getMunicipis',
+	    value: function getMunicipis() {
+	      return this.municipis;
 	    }
 	  }, {
-	    key: 'setPrediccioMunicipi',
-	    value: function setPrediccioMunicipi(selectorId, prediccioMunicipi) {
-	      this.prediccioMunicipi[selectorId] = prediccioMunicipi;
+	    key: 'fetchMunicipis',
+	    value: function fetchMunicipis() {
+	      fetch('/municipis/metadades').then(function (response) {
+	        return response.json();
+	      }).then(function (receivedMetadata) {
+	        actions.receiveMunicipis(receivedMetadata);
+	      });
+	    }
+	  }, {
+	    key: 'receiveMunicipis',
+	    value: function receiveMunicipis(newMunicipis) {
+	      this.municipis = newMunicipis;
 	    }
 	
 	    // Overriden method given by Flux library Store 
@@ -22617,18 +22625,22 @@
 	
 	      switch (action.type) {
 	
-	        case actionNames.RECEIVE_PREDICCIO_MUNICIPI:
-	          this.setPrediccioMunicipi(action.selectorId, action.prediccioMunicipi);
+	        case actionNames.FETCH_MUNICIPIS:
+	          this.fetchMunicipis();
+	          break;
+	
+	        case actionNames.RECEIVE_MUNICIPIS:
+	          this.receiveMunicipis(action.municipis);
 	          this.__emitChange();
 	          break;
 	      }
 	    }
 	  }]);
 	
-	  return MunicipiStore;
+	  return MunicipisStore;
 	}(_utils.Store);
 	
-	var instance = new MunicipiStore(AppDispatcher);
+	var instance = new MunicipisStore(AppDispatcher);
 	module.exports = instance;
 
 /***/ },
@@ -29127,87 +29139,6 @@
 
 /***/ },
 /* 199 */
-/*!*******************************************!*\
-  !*** ./frontend/stores/MunicipisStore.js ***!
-  \*******************************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	var _utils = __webpack_require__(/*! flux/utils */ 182);
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	var actionNames = __webpack_require__(/*! ../actions/MunicipisActionNames */ 176);
-	var actions = __webpack_require__(/*! ../actions/MunicipisActions */ 175);
-	var AppDispatcher = __webpack_require__(/*! ../dispatcher/AppDispatcher */ 177);
-	
-	var MunicipisStore = function (_Store) {
-	  _inherits(MunicipisStore, _Store);
-	
-	  function MunicipisStore(dispatcher) {
-	    _classCallCheck(this, MunicipisStore);
-	
-	    var _this = _possibleConstructorReturn(this, (MunicipisStore.__proto__ || Object.getPrototypeOf(MunicipisStore)).call(this, dispatcher));
-	
-	    _this.municipis = [];
-	    return _this;
-	  }
-	
-	  _createClass(MunicipisStore, [{
-	    key: 'getMunicipis',
-	    value: function getMunicipis() {
-	      return this.municipis;
-	    }
-	  }, {
-	    key: 'fetchMunicipis',
-	    value: function fetchMunicipis() {
-	      fetch('/municipis/metadades').then(function (response) {
-	        return response.json();
-	      }).then(function (receivedMetadata) {
-	        actions.receiveMunicipis(receivedMetadata);
-	      });
-	    }
-	  }, {
-	    key: 'receiveMunicipis',
-	    value: function receiveMunicipis(newMunicipis) {
-	      this.municipis = newMunicipis;
-	    }
-	
-	    // Overriden method given by Flux library Store 
-	
-	  }, {
-	    key: '__onDispatch',
-	    value: function __onDispatch(action) {
-	
-	      switch (action.type) {
-	
-	        case actionNames.FETCH_MUNICIPIS:
-	          this.fetchMunicipis();
-	          break;
-	
-	        case actionNames.RECEIVE_MUNICIPIS:
-	          this.receiveMunicipis(action.municipis);
-	          this.__emitChange();
-	          break;
-	      }
-	    }
-	  }]);
-	
-	  return MunicipisStore;
-	}(_utils.Store);
-	
-	var instance = new MunicipisStore(AppDispatcher);
-	module.exports = instance;
-
-/***/ },
-/* 200 */
 /*!******************************************!*\
   !*** ./frontend/stores/MunicipiStore.js ***!
   \******************************************/
@@ -29228,7 +29159,7 @@
 	var actionNames = __webpack_require__(/*! ../actions/MunicipisActionNames */ 176);
 	var actions = __webpack_require__(/*! ../actions/MunicipisActions */ 175);
 	var AppDispatcher = __webpack_require__(/*! ../dispatcher/AppDispatcher */ 177);
-	var municipisStore = __webpack_require__(/*! ./MunicipisStore */ 199);
+	var municipisStore = __webpack_require__(/*! ./MunicipisStore */ 181);
 	
 	var MunicipiStore = function (_Store) {
 	  _inherits(MunicipiStore, _Store);
@@ -29262,10 +29193,22 @@
 	  }, {
 	    key: 'setDefaultSelectedMunicipis',
 	    value: function setDefaultSelectedMunicipis(municipis) {
+	      var _this2 = this;
+	
 	      var numberOfMunicipis = municipis.length;
 	
+	      var _loop = function _loop(i) {
+	        _this2.selectedMunicipisCodi[i] = _this2.selectedMunicipisCodi[i] || municipis[i % numberOfMunicipis].codi;
+	
+	        fetch('/municipis/' + _this2.selectedMunicipisCodi[i]).then(function (response) {
+	          return response.json();
+	        }).then(function (prediccioMunicipi) {
+	          actions.receivePrediccioMunicipi(i, prediccioMunicipi);
+	        });
+	      };
+	
 	      for (var i = 0; i < this.numberOfMunicipisToShow; i++) {
-	        this.selectedMunicipisCodi[i] = this.selectedMunicipisCodi[i] || municipis[i % numberOfMunicipis].codi;
+	        _loop(i);
 	      }
 	    }
 	
@@ -29284,6 +29227,73 @@
 	
 	        case actionNames.RECEIVE_MUNICIPIS:
 	          this.setDefaultSelectedMunicipis(action.municipis);
+	          this.__emitChange();
+	          break;
+	      }
+	    }
+	  }]);
+	
+	  return MunicipiStore;
+	}(_utils.Store);
+	
+	var instance = new MunicipiStore(AppDispatcher);
+	module.exports = instance;
+
+/***/ },
+/* 200 */
+/*!*******************************************!*\
+  !*** ./frontend/stores/PrediccioStore.js ***!
+  \*******************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _utils = __webpack_require__(/*! flux/utils */ 182);
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var actionNames = __webpack_require__(/*! ../actions/MunicipisActionNames */ 176);
+	var AppDispatcher = __webpack_require__(/*! ../dispatcher/AppDispatcher */ 177);
+	
+	var MunicipiStore = function (_Store) {
+	  _inherits(MunicipiStore, _Store);
+	
+	  function MunicipiStore(dispatcher) {
+	    _classCallCheck(this, MunicipiStore);
+	
+	    var _this = _possibleConstructorReturn(this, (MunicipiStore.__proto__ || Object.getPrototypeOf(MunicipiStore)).call(this, dispatcher));
+	
+	    _this.prediccioMunicipi = {};
+	    return _this;
+	  }
+	
+	  _createClass(MunicipiStore, [{
+	    key: 'getPrediccionsMunicipals',
+	    value: function getPrediccionsMunicipals() {
+	      return this.prediccioMunicipi;
+	    }
+	  }, {
+	    key: 'setPrediccioMunicipi',
+	    value: function setPrediccioMunicipi(selectorId, prediccioMunicipi) {
+	      this.prediccioMunicipi[selectorId] = prediccioMunicipi;
+	    }
+	
+	    // Overriden method given by Flux library Store 
+	
+	  }, {
+	    key: '__onDispatch',
+	    value: function __onDispatch(action) {
+	
+	      switch (action.type) {
+	
+	        case actionNames.RECEIVE_PREDICCIO_MUNICIPI:
+	          this.setPrediccioMunicipi(action.selectorId, action.prediccioMunicipi);
 	          this.__emitChange();
 	          break;
 	      }

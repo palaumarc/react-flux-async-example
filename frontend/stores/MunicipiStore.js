@@ -32,8 +32,16 @@ class MunicipiStore extends Store {
   setDefaultSelectedMunicipis(municipis) {
     var numberOfMunicipis = municipis.length;
 
-    for (var i = 0; i < this.numberOfMunicipisToShow; i++) {
+    for (let i = 0; i < this.numberOfMunicipisToShow; i++) {
       this.selectedMunicipisCodi[i] = this.selectedMunicipisCodi[i] || municipis[i%numberOfMunicipis].codi;
+
+      fetch('/municipis/' + this.selectedMunicipisCodi[i])
+        .then((response) => {
+          return response.json();
+        })
+        .then((prediccioMunicipi) => {
+          actions.receivePrediccioMunicipi(i, prediccioMunicipi);
+        });
     }
   }
 

@@ -1,7 +1,6 @@
 var React = require('react');
 var PrediccioMunicipi = require('./PrediccioMunicipi');
 var actions = require('../actions/MunicipisActions');
-var prediccioStore = require('../stores/PrediccioStore');
 
 var Municipi = React.createClass({
 

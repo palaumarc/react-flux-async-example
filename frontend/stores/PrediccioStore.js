@@ -1,7 +1,6 @@
 import { Store } from 'flux/utils';
 
 var actionNames = require('../actions/MunicipisActionNames');
-var actions = require('../actions/MunicipisActions');
 var AppDispatcher = require('../dispatcher/AppDispatcher');
 
 class MunicipiStore extends Store {
