@@ -21965,8 +21965,8 @@
 	
 	var React = __webpack_require__(/*! react */ 1);
 	var Municipi = __webpack_require__(/*! ./Municipi */ 173);
-	var municipisStore = __webpack_require__(/*! ../stores/MunicipisStore */ 199);
-	var municipiStore = __webpack_require__(/*! ../stores/MunicipiStore */ 181);
+	var municipisStore = __webpack_require__(/*! ../stores/MunicipisStore */ 181);
+	var municipiStore = __webpack_require__(/*! ../stores/MunicipiStore */ 199);
 	var actions = __webpack_require__(/*! ../actions/MunicipisActions */ 175);
 	
 	var MainContainer = React.createClass({
@@ -22044,6 +22044,10 @@
 	  selectChangeHandler: function selectChangeHandler(e) {
 	    var selectedMunicipiCodi = e.target.value;
 	    actions.selectMunicipi(this.props.selectorId, selectedMunicipiCodi);
+	  },
+	
+	  shouldComponentUpdate: function shouldComponentUpdate(nextProps, nextState) {
+	    return nextProps.selectedMunicipiCodi !== this.props.selectedMunicipiCodi;
 	  },
 	
 	  render: function render() {
@@ -22530,9 +22534,9 @@
 
 /***/ },
 /* 181 */
-/*!******************************************!*\
-  !*** ./frontend/stores/MunicipiStore.js ***!
-  \******************************************/
+/*!*******************************************!*\
+  !*** ./frontend/stores/MunicipisStore.js ***!
+  \*******************************************/
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22550,36 +22554,37 @@
 	var actionNames = __webpack_require__(/*! ../actions/MunicipisActionNames */ 176);
 	var actions = __webpack_require__(/*! ../actions/MunicipisActions */ 175);
 	var AppDispatcher = __webpack_require__(/*! ../dispatcher/AppDispatcher */ 177);
-	var municipisStore = __webpack_require__(/*! ./MunicipisStore */ 199);
 	
-	var MunicipiStore = function (_Store) {
-	  _inherits(MunicipiStore, _Store);
+	var MunicipisStore = function (_Store) {
+	  _inherits(MunicipisStore, _Store);
 	
-	  function MunicipiStore(dispatcher) {
-	    _classCallCheck(this, MunicipiStore);
+	  function MunicipisStore(dispatcher) {
+	    _classCallCheck(this, MunicipisStore);
 	
-	    var _this = _possibleConstructorReturn(this, (MunicipiStore.__proto__ || Object.getPrototypeOf(MunicipiStore)).call(this, dispatcher));
+	    var _this = _possibleConstructorReturn(this, (MunicipisStore.__proto__ || Object.getPrototypeOf(MunicipisStore)).call(this, dispatcher));
 	
-	    _this.selectedMunicipisCodi = {};
+	    _this.municipis = [];
 	    return _this;
 	  }
 	
-	  _createClass(MunicipiStore, [{
-	    key: 'getSelectedMunicipisCodi',
-	    value: function getSelectedMunicipisCodi() {
-	      return this.selectedMunicipisCodi;
+	  _createClass(MunicipisStore, [{
+	    key: 'getMunicipis',
+	    value: function getMunicipis() {
+	      return this.municipis;
 	    }
 	  }, {
-	    key: 'selectMunicipi',
-	    value: function selectMunicipi(selectorId, codiMunicipi) {
-	      this.selectedMunicipisCodi[selectorId] = codiMunicipi;
+	    key: 'fetchMunicipis',
+	    value: function fetchMunicipis() {
+	      fetch('/municipis/metadades').then(function (response) {
+	        return response.json();
+	      }).then(function (receivedMetadata) {
+	        actions.receiveMunicipis(receivedMetadata);
+	      });
 	    }
 	  }, {
-	    key: 'setDefaultSelectedMunicipis',
-	    value: function setDefaultSelectedMunicipis(municipis) {
-	      for (var i = 0; i < 2; i++) {
-	        this.selectedMunicipisCodi[i] = municipis[i].codi;
-	      }
+	    key: 'receiveMunicipis',
+	    value: function receiveMunicipis(newMunicipis) {
+	      this.municipis = newMunicipis;
 	    }
 	
 	    // Overriden method given by Flux library Store 
@@ -22590,23 +22595,22 @@
 	
 	      switch (action.type) {
 	
-	        case actionNames.SELECT_MUNICIPI:
-	          this.selectMunicipi(action.selectorId, action.codiMunicipi);
-	          this.__emitChange();
+	        case actionNames.FETCH_MUNICIPIS:
+	          this.fetchMunicipis();
 	          break;
 	
 	        case actionNames.RECEIVE_MUNICIPIS:
-	          this.setDefaultSelectedMunicipis(action.municipis);
+	          this.receiveMunicipis(action.municipis);
 	          this.__emitChange();
 	          break;
 	      }
 	    }
 	  }]);
 	
-	  return MunicipiStore;
+	  return MunicipisStore;
 	}(_utils.Store);
 	
-	var instance = new MunicipiStore(AppDispatcher);
+	var instance = new MunicipisStore(AppDispatcher);
 	module.exports = instance;
 
 /***/ },
@@ -29105,9 +29109,9 @@
 
 /***/ },
 /* 199 */
-/*!*******************************************!*\
-  !*** ./frontend/stores/MunicipisStore.js ***!
-  \*******************************************/
+/*!******************************************!*\
+  !*** ./frontend/stores/MunicipiStore.js ***!
+  \******************************************/
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -29125,37 +29129,36 @@
 	var actionNames = __webpack_require__(/*! ../actions/MunicipisActionNames */ 176);
 	var actions = __webpack_require__(/*! ../actions/MunicipisActions */ 175);
 	var AppDispatcher = __webpack_require__(/*! ../dispatcher/AppDispatcher */ 177);
+	var municipisStore = __webpack_require__(/*! ./MunicipisStore */ 181);
 	
-	var MunicipisStore = function (_Store) {
-	  _inherits(MunicipisStore, _Store);
+	var MunicipiStore = function (_Store) {
+	  _inherits(MunicipiStore, _Store);
 	
-	  function MunicipisStore(dispatcher) {
-	    _classCallCheck(this, MunicipisStore);
+	  function MunicipiStore(dispatcher) {
+	    _classCallCheck(this, MunicipiStore);
 	
-	    var _this = _possibleConstructorReturn(this, (MunicipisStore.__proto__ || Object.getPrototypeOf(MunicipisStore)).call(this, dispatcher));
+	    var _this = _possibleConstructorReturn(this, (MunicipiStore.__proto__ || Object.getPrototypeOf(MunicipiStore)).call(this, dispatcher));
 	
-	    _this.municipis = [];
+	    _this.selectedMunicipisCodi = {};
 	    return _this;
 	  }
 	
-	  _createClass(MunicipisStore, [{
-	    key: 'getMunicipis',
-	    value: function getMunicipis() {
-	      return this.municipis;
+	  _createClass(MunicipiStore, [{
+	    key: 'getSelectedMunicipisCodi',
+	    value: function getSelectedMunicipisCodi() {
+	      return this.selectedMunicipisCodi;
 	    }
 	  }, {
-	    key: 'fetchMunicipis',
-	    value: function fetchMunicipis() {
-	      fetch('/municipis/metadades').then(function (response) {
-	        return response.json();
-	      }).then(function (receivedMetadata) {
-	        actions.receiveMunicipis(receivedMetadata);
-	      });
+	    key: 'selectMunicipi',
+	    value: function selectMunicipi(selectorId, codiMunicipi) {
+	      this.selectedMunicipisCodi[selectorId] = codiMunicipi;
 	    }
 	  }, {
-	    key: 'receiveMunicipis',
-	    value: function receiveMunicipis(newMunicipis) {
-	      this.municipis = newMunicipis;
+	    key: 'setDefaultSelectedMunicipis',
+	    value: function setDefaultSelectedMunicipis(municipis) {
+	      for (var i = 0; i < 2; i++) {
+	        this.selectedMunicipisCodi[i] = municipis[i].codi;
+	      }
 	    }
 	
 	    // Overriden method given by Flux library Store 
@@ -29166,22 +29169,23 @@
 	
 	      switch (action.type) {
 	
-	        case actionNames.FETCH_MUNICIPIS:
-	          this.fetchMunicipis();
+	        case actionNames.SELECT_MUNICIPI:
+	          this.selectMunicipi(action.selectorId, action.codiMunicipi);
+	          this.__emitChange();
 	          break;
 	
 	        case actionNames.RECEIVE_MUNICIPIS:
-	          this.receiveMunicipis(action.municipis);
+	          this.setDefaultSelectedMunicipis(action.municipis);
 	          this.__emitChange();
 	          break;
 	      }
 	    }
 	  }]);
 	
-	  return MunicipisStore;
+	  return MunicipiStore;
 	}(_utils.Store);
 	
-	var instance = new MunicipisStore(AppDispatcher);
+	var instance = new MunicipiStore(AppDispatcher);
 	module.exports = instance;
 
 /***/ }

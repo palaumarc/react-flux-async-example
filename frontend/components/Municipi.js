@@ -9,6 +9,10 @@ var Municipi = React.createClass({
     actions.selectMunicipi(this.props.selectorId, selectedMunicipiCodi);
   },
 
+  shouldComponentUpdate: function(nextProps, nextState) {
+    return nextProps.selectedMunicipiCodi !== this.props.selectedMunicipiCodi;
+  },
+
   render: function() {
 
     var divStyle = { float : 'left' };
