@@ -11,9 +11,7 @@ var PrediccioMunicipi = React.createClass({
   render: function() {
 
     var imgStyle = {};
-        var barStyle = {
-      width: "60%"
-    };
+    
     
     var divStyle = {
       margin: "5px"
@@ -30,6 +28,10 @@ var PrediccioMunicipi = React.createClass({
 
     var informacioDiaSeleccionat = this.props.prediccio.dies[this.props.indexOfActiveDay].variables;
 
+    var barStyle = {
+      width: informacioDiaSeleccionat.precipitacio.valor + "%"
+    };
+
     return (
       <div>
         <ul className="nav nav-tabs">
@@ -39,11 +41,11 @@ var PrediccioMunicipi = React.createClass({
           <h3>Temperatura:</h3>
           <h4 className="panel-body">{informacioDiaSeleccionat.tmin.valor} {informacioDiaSeleccionat.tmin.unitats}</h4>
           <h4 className="panel-body">{informacioDiaSeleccionat.tmax.valor} {informacioDiaSeleccionat.tmax.unitats}</h4>
-          <img src={'./img/' + informacioDiaSeleccionat.estatCel.simbol + '.png'} style={imgStyle}/>
+          <img src={'./img/' + informacioDiaSeleccionat.estatCel.simbol + '.png'} />
 
           <h3>Precipitació:</h3>
           <div className="progress" style={divStyle}>
-            <div className="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style={barStyle}>
+            <div className="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" style={barStyle}>
             {informacioDiaSeleccionat.precipitacio.valor} {informacioDiaSeleccionat.precipitacio.unitat}
             </div>
           </div>

@@ -22174,9 +22174,6 @@
 	    var _this = this;
 	
 	    var imgStyle = {};
-	    var barStyle = {
-	      width: "60%"
-	    };
 	
 	    var divStyle = {
 	      margin: "5px"
@@ -22198,6 +22195,10 @@
 	    });
 	
 	    var informacioDiaSeleccionat = this.props.prediccio.dies[this.props.indexOfActiveDay].variables;
+	
+	    var barStyle = {
+	      width: informacioDiaSeleccionat.precipitacio.valor + "%"
+	    };
 	
 	    return React.createElement(
 	      'div',
@@ -22229,7 +22230,7 @@
 	          ' ',
 	          informacioDiaSeleccionat.tmax.unitats
 	        ),
-	        React.createElement('img', { src: './img/' + informacioDiaSeleccionat.estatCel.simbol + '.png', style: imgStyle }),
+	        React.createElement('img', { src: './img/' + informacioDiaSeleccionat.estatCel.simbol + '.png' }),
 	        React.createElement(
 	          'h3',
 	          null,
@@ -22240,7 +22241,7 @@
 	          { className: 'progress', style: divStyle },
 	          React.createElement(
 	            'div',
-	            { className: 'progress-bar', role: 'progressbar', 'aria-valuenow': '60', 'aria-valuemin': '0', 'aria-valuemax': '100', style: barStyle },
+	            { className: 'progress-bar', role: 'progressbar', 'aria-valuemin': '0', 'aria-valuemax': '100', style: barStyle },
 	            informacioDiaSeleccionat.precipitacio.valor,
 	            ' ',
 	            informacioDiaSeleccionat.precipitacio.unitat
