@@ -22004,6 +22004,7 @@
 	  },
 	
 	  render: function render() {
+	    var _this = this;
 	
 	    if (this.state.municipis.length <= 0) {
 	      return React.createElement(
@@ -22013,11 +22014,14 @@
 	      );
 	    }
 	
+	    var municipiPanels = Object.keys(this.state.selectedMunicipisCodi).map(function (panelId) {
+	      return React.createElement(Municipi, { key: panelId, selectorId: panelId, municipis: _this.state.municipis, selectedMunicipiCodi: _this.state.selectedMunicipisCodi[panelId] });
+	    });
+	
 	    return React.createElement(
 	      'div',
 	      null,
-	      React.createElement(Municipi, { selectorId: 0, municipis: this.state.municipis, selectedMunicipiCodi: this.state.selectedMunicipisCodi[0] }),
-	      React.createElement(Municipi, { selectorId: 1, municipis: this.state.municipis, selectedMunicipiCodi: this.state.selectedMunicipisCodi[1] })
+	      municipiPanels
 	    );
 	  }
 	});
@@ -29140,10 +29144,16 @@
 	    var _this = _possibleConstructorReturn(this, (MunicipiStore.__proto__ || Object.getPrototypeOf(MunicipiStore)).call(this, dispatcher));
 	
 	    _this.selectedMunicipisCodi = {};
+	    _this.numberOfMunicipisToShow = 7;
 	    return _this;
 	  }
 	
 	  _createClass(MunicipiStore, [{
+	    key: 'getNumberOfMunicipisToShow',
+	    value: function getNumberOfMunicipisToShow() {
+	      return this.numberOfMunicipisToShow;
+	    }
+	  }, {
 	    key: 'getSelectedMunicipisCodi',
 	    value: function getSelectedMunicipisCodi() {
 	      return this.selectedMunicipisCodi;
@@ -29156,8 +29166,10 @@
 	  }, {
 	    key: 'setDefaultSelectedMunicipis',
 	    value: function setDefaultSelectedMunicipis(municipis) {
-	      for (var i = 0; i < 2; i++) {
-	        this.selectedMunicipisCodi[i] = municipis[i].codi;
+	      var numberOfMunicipis = municipis.length;
+	
+	      for (var i = 0; i < this.numberOfMunicipisToShow; i++) {
+	        this.selectedMunicipisCodi[i] = municipis[i % numberOfMunicipis].codi;
 	      }
 	    }
 	

@@ -47,10 +47,15 @@ var MainContainer = React.createClass({
       )
     }
 
+    var municipiPanels = Object.keys(this.state.selectedMunicipisCodi).map((panelId) => (
+        <Municipi key={panelId} selectorId={panelId} municipis={this.state.municipis} selectedMunicipiCodi={this.state.selectedMunicipisCodi[panelId]}/>
+      ));
+
     return (
       <div>
-        <Municipi selectorId={0} municipis={this.state.municipis} selectedMunicipiCodi={this.state.selectedMunicipisCodi[0]}/>
-        <Municipi selectorId={1} municipis={this.state.municipis} selectedMunicipiCodi={this.state.selectedMunicipisCodi[1]}/>
+        {municipiPanels}
+        {/*<Municipi selectorId={0} municipis={this.state.municipis} selectedMunicipiCodi={this.state.selectedMunicipisCodi[0]}/>
+        <Municipi selectorId={1} municipis={this.state.municipis} selectedMunicipiCodi={this.state.selectedMunicipisCodi[1]}/>*/}
       </div>
     )
   }
