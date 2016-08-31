@@ -4,7 +4,6 @@ var municipisStore = require('../stores/MunicipisStore');
 var municipiStore = require('../stores/MunicipiStore');
 var actions = require('../actions/MunicipisActions');
 
-
 var MainContainer = React.createClass({
 
   getInitialState: function() {
@@ -54,8 +53,6 @@ var MainContainer = React.createClass({
     return (
       <div>
         {municipiPanels}
-        {/*<Municipi selectorId={0} municipis={this.state.municipis} selectedMunicipiCodi={this.state.selectedMunicipisCodi[0]}/>
-        <Municipi selectorId={1} municipis={this.state.municipis} selectedMunicipiCodi={this.state.selectedMunicipisCodi[1]}/>*/}
       </div>
     )
   }
