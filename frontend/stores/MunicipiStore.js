@@ -29,7 +29,7 @@ class MunicipiStore extends Store {
     var numberOfMunicipis = municipis.length;
 
     for (var i = 0; i < this.numberOfMunicipisToShow; i++) {
-      this.selectedMunicipisCodi[i] = municipis[i%numberOfMunicipis].codi;
+      this.selectedMunicipisCodi[i] = this.selectedMunicipisCodi[i] || municipis[i%numberOfMunicipis].codi;
     }
   }
 
