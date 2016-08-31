@@ -1,12 +1,33 @@
 var React = require('react');
 var PrediccioMunicipi = require('./PrediccioMunicipi');
 var actions = require('../actions/MunicipisActions');
+var activeDayStore = require('../stores/ActiveDayStore');
 
 var Municipi = React.createClass({
+
+  getInitialState: function() {
+    return {
+      indexOfActiveDay: activeDayStore.getActiveDay(this.props.selectorId)
+    }
+  },
 
   // shouldComponentUpdate: function(nextProps, nextState) {
   //   return nextProps.selectedMunicipiCodi !== this.props.selectedMunicipiCodi;
   // },
+
+  componentDidMount: function() {
+    this.activeDayStoreRemoveToken = activeDayStore.addListener(this.updateActiveDay);
+  },
+
+  componentWillUnmount: function() {
+    this.activeDayStoreRemoveToken.remove();
+  },
+
+  updateActiveDay: function() {
+    this.setState({
+      indexOfActiveDay: activeDayStore.getActiveDay(this.props.selectorId)
+    });
+  },
 
   selectChangeHandler: function(e) {
     var selectedMunicipiCodi = e.target.value;
@@ -32,13 +53,17 @@ var Municipi = React.createClass({
     var prediccioMunicipiComponent = '';
 
     if (this.props.prediccio) {
-      prediccioMunicipiComponent = <PrediccioMunicipi prediccio={this.props.prediccio} />
+      prediccioMunicipiComponent = <PrediccioMunicipi 
+                                      selectorId={this.props.selectorId} 
+                                      prediccio={this.props.prediccio} 
+                                      indexOfActiveDay={this.state.indexOfActiveDay || 0}
+                                    />
     }
 
     return (
-      <div style={divStyle}>
+      <div className="form-group" style={divStyle}>
         <h2>Municipi</h2>
-        <select value={defaultSelectValue} onChange={this.selectChangeHandler}>
+        <select className="form-control" value={defaultSelectValue} onChange={this.selectChangeHandler}>
           {listItems}
         </select>
         <h2>Comarca</h2>

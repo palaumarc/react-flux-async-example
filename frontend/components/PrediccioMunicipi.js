@@ -1,17 +1,53 @@
 var React = require('react');
+var actions = require('../actions/MunicipisActions');
 
 var PrediccioMunicipi = React.createClass({
 
+  handleTabChange: function(event) {
+    var indexOfActiveDay = event.target.id;
+    actions.changeActiveDay(this.props.selectorId, indexOfActiveDay);
+  },
+
   render: function() {
+
+    var imgStyle = {};
+        var barStyle = {
+      width: "60%"
+    };
+    
+    var divStyle = {
+      margin: "5px"
+    };
+
+    var tabsOfdays = this.props.prediccio.dies.map((dia, index) => {
+     
+        return (            
+          <li key={index} onClick={this.handleTabChange} className={this.props.indexOfActiveDay == index ? 'active' : null}> 
+            <a href="#" id={index}> {dia.data} </a>
+          </li>
+        );
+      });
+
+    var informacioDiaSeleccionat = this.props.prediccio.dies[this.props.indexOfActiveDay].variables;
 
     return (
       <div>
-        <h3>Codi:</h3>
-        {this.props.prediccio.codi}
-        <h3>Dia1:</h3>
-        {this.props.prediccio.dies[0].variables.precipitacio.valor}
-        <h3>Dia2:</h3>
-        {this.props.prediccio.dies[1].variables.precipitacio.valor}
+        <ul className="nav nav-tabs">
+          { tabsOfdays }
+        </ul>   
+        <section>
+          <h3>Temperatura:</h3>
+          <h4 className="panel-body">{informacioDiaSeleccionat.tmin.valor} {informacioDiaSeleccionat.tmin.unitats}</h4>
+          <h4 className="panel-body">{informacioDiaSeleccionat.tmax.valor} {informacioDiaSeleccionat.tmax.unitats}</h4>
+          <img src={'./img/' + informacioDiaSeleccionat.estatCel.simbol + '.png'} style={imgStyle}/>
+
+          <h3>Precipitació:</h3>
+          <div className="progress" style={divStyle}>
+            <div className="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style={barStyle}>
+            {informacioDiaSeleccionat.precipitacio.valor} {informacioDiaSeleccionat.precipitacio.unitat}
+            </div>
+          </div>
+        </section>
       </div>
     )
   }

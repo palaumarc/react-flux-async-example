@@ -22057,14 +22057,35 @@
 	var React = __webpack_require__(/*! react */ 1);
 	var PrediccioMunicipi = __webpack_require__(/*! ./PrediccioMunicipi */ 174);
 	var actions = __webpack_require__(/*! ../actions/MunicipisActions */ 175);
+	var activeDayStore = __webpack_require__(/*! ../stores/ActiveDayStore */ 201);
 	
 	var Municipi = React.createClass({
 	  displayName: 'Municipi',
 	
 	
+	  getInitialState: function getInitialState() {
+	    return {
+	      indexOfActiveDay: activeDayStore.getActiveDay(this.props.selectorId)
+	    };
+	  },
+	
 	  // shouldComponentUpdate: function(nextProps, nextState) {
 	  //   return nextProps.selectedMunicipiCodi !== this.props.selectedMunicipiCodi;
 	  // },
+	
+	  componentDidMount: function componentDidMount() {
+	    this.activeDayStoreRemoveToken = activeDayStore.addListener(this.updateActiveDay);
+	  },
+	
+	  componentWillUnmount: function componentWillUnmount() {
+	    this.activeDayStoreRemoveToken.remove();
+	  },
+	
+	  updateActiveDay: function updateActiveDay() {
+	    this.setState({
+	      indexOfActiveDay: activeDayStore.getActiveDay(this.props.selectorId)
+	    });
+	  },
 	
 	  selectChangeHandler: function selectChangeHandler(e) {
 	    var selectedMunicipiCodi = e.target.value;
@@ -22095,12 +22116,16 @@
 	    var prediccioMunicipiComponent = '';
 	
 	    if (this.props.prediccio) {
-	      prediccioMunicipiComponent = React.createElement(PrediccioMunicipi, { prediccio: this.props.prediccio });
+	      prediccioMunicipiComponent = React.createElement(PrediccioMunicipi, {
+	        selectorId: this.props.selectorId,
+	        prediccio: this.props.prediccio,
+	        indexOfActiveDay: this.state.indexOfActiveDay || 0
+	      });
 	    }
 	
 	    return React.createElement(
 	      'div',
-	      { style: divStyle },
+	      { className: 'form-group', style: divStyle },
 	      React.createElement(
 	        'h2',
 	        null,
@@ -22108,7 +22133,7 @@
 	      ),
 	      React.createElement(
 	        'select',
-	        { value: defaultSelectValue, onChange: this.selectChangeHandler },
+	        { className: 'form-control', value: defaultSelectValue, onChange: this.selectChangeHandler },
 	        listItems
 	      ),
 	      React.createElement(
@@ -22134,34 +22159,94 @@
 	'use strict';
 	
 	var React = __webpack_require__(/*! react */ 1);
+	var actions = __webpack_require__(/*! ../actions/MunicipisActions */ 175);
 	
 	var PrediccioMunicipi = React.createClass({
 	  displayName: 'PrediccioMunicipi',
 	
 	
+	  handleTabChange: function handleTabChange(event) {
+	    var indexOfActiveDay = event.target.id;
+	    actions.changeActiveDay(this.props.selectorId, indexOfActiveDay);
+	  },
+	
 	  render: function render() {
+	    var _this = this;
+	
+	    var imgStyle = {};
+	    var barStyle = {
+	      width: "60%"
+	    };
+	
+	    var divStyle = {
+	      margin: "5px"
+	    };
+	
+	    var tabsOfdays = this.props.prediccio.dies.map(function (dia, index) {
+	
+	      return React.createElement(
+	        'li',
+	        { key: index, onClick: _this.handleTabChange, className: _this.props.indexOfActiveDay == index ? 'active' : null },
+	        React.createElement(
+	          'a',
+	          { href: '#', id: index },
+	          ' ',
+	          dia.data,
+	          ' '
+	        )
+	      );
+	    });
+	
+	    var informacioDiaSeleccionat = this.props.prediccio.dies[this.props.indexOfActiveDay].variables;
 	
 	    return React.createElement(
 	      'div',
 	      null,
 	      React.createElement(
-	        'h3',
-	        null,
-	        'Codi:'
+	        'ul',
+	        { className: 'nav nav-tabs' },
+	        tabsOfdays
 	      ),
-	      this.props.prediccio.codi,
 	      React.createElement(
-	        'h3',
+	        'section',
 	        null,
-	        'Dia1:'
-	      ),
-	      this.props.prediccio.dies[0].variables.precipitacio.valor,
-	      React.createElement(
-	        'h3',
-	        null,
-	        'Dia2:'
-	      ),
-	      this.props.prediccio.dies[1].variables.precipitacio.valor
+	        React.createElement(
+	          'h3',
+	          null,
+	          'Temperatura:'
+	        ),
+	        React.createElement(
+	          'h4',
+	          { className: 'panel-body' },
+	          informacioDiaSeleccionat.tmin.valor,
+	          ' ',
+	          informacioDiaSeleccionat.tmin.unitats
+	        ),
+	        React.createElement(
+	          'h4',
+	          { className: 'panel-body' },
+	          informacioDiaSeleccionat.tmax.valor,
+	          ' ',
+	          informacioDiaSeleccionat.tmax.unitats
+	        ),
+	        React.createElement('img', { src: './img/' + informacioDiaSeleccionat.estatCel.simbol + '.png', style: imgStyle }),
+	        React.createElement(
+	          'h3',
+	          null,
+	          'Precipitació:'
+	        ),
+	        React.createElement(
+	          'div',
+	          { className: 'progress', style: divStyle },
+	          React.createElement(
+	            'div',
+	            { className: 'progress-bar', role: 'progressbar', 'aria-valuenow': '60', 'aria-valuemin': '0', 'aria-valuemax': '100', style: barStyle },
+	            informacioDiaSeleccionat.precipitacio.valor,
+	            ' ',
+	            informacioDiaSeleccionat.precipitacio.unitat
+	          )
+	        )
+	      )
 	    );
 	  }
 	});
@@ -22209,6 +22294,14 @@
 	      selectorId: selectorId,
 	      prediccioMunicipi: prediccioMunicipi
 	    });
+	  },
+	
+	  changeActiveDay: function changeActiveDay(selectorId, indexOfActiveDay) {
+	    AppDispatcher.dispatch({
+	      type: actionConstants.CHANGE_ACTIVE_DAY,
+	      selectorId: selectorId,
+	      indexOfActiveDay: indexOfActiveDay
+	    });
 	  }
 	
 	};
@@ -22227,7 +22320,8 @@
 	  SELECT_MUNICIPI: 'SELECT_MUNICIPI',
 	  FETCH_MUNICIPIS: 'FETCH_MUNICIPIS',
 	  RECEIVE_MUNICIPIS: 'RECEIVE_MUNICIPIS',
-	  RECEIVE_PREDICCIO_MUNICIPI: 'RECEIVE_PREDICCIO_MUNICIPI'
+	  RECEIVE_PREDICCIO_MUNICIPI: 'RECEIVE_PREDICCIO_MUNICIPI',
+	  CHANGE_ACTIVE_DAY: 'CHANGE_ACTIVE_DAY'
 	
 	};
 
@@ -29169,7 +29263,7 @@
 	
 	    var _this = _possibleConstructorReturn(this, (MunicipiStore.__proto__ || Object.getPrototypeOf(MunicipiStore)).call(this, dispatcher));
 	
-	    _this.numberOfMunicipisToShow = 3;
+	    _this.numberOfMunicipisToShow = 7;
 	    _this.selectedMunicipisCodi = {};
 	    return _this;
 	  }
@@ -29193,22 +29287,11 @@
 	  }, {
 	    key: 'setDefaultSelectedMunicipis',
 	    value: function setDefaultSelectedMunicipis(municipis) {
-	      var _this2 = this;
-	
 	      var numberOfMunicipis = municipis.length;
 	
-	      var _loop = function _loop(i) {
-	        _this2.selectedMunicipisCodi[i] = _this2.selectedMunicipisCodi[i] || municipis[i % numberOfMunicipis].codi;
-	
-	        fetch('/municipis/' + _this2.selectedMunicipisCodi[i]).then(function (response) {
-	          return response.json();
-	        }).then(function (prediccioMunicipi) {
-	          actions.receivePrediccioMunicipi(i, prediccioMunicipi);
-	        });
-	      };
-	
 	      for (var i = 0; i < this.numberOfMunicipisToShow; i++) {
-	        _loop(i);
+	        var defaultSelectedMunicipi = this.selectedMunicipisCodi[i] || municipis[i % numberOfMunicipis].codi;
+	        this.selectMunicipi(i, defaultSelectedMunicipi);
 	      }
 	    }
 	
@@ -29304,6 +29387,76 @@
 	}(_utils.Store);
 	
 	var instance = new MunicipiStore(AppDispatcher);
+	module.exports = instance;
+
+/***/ },
+/* 201 */
+/*!*******************************************!*\
+  !*** ./frontend/stores/ActiveDayStore.js ***!
+  \*******************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _utils = __webpack_require__(/*! flux/utils */ 182);
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var actionNames = __webpack_require__(/*! ../actions/MunicipisActionNames */ 176);
+	var AppDispatcher = __webpack_require__(/*! ../dispatcher/AppDispatcher */ 177);
+	
+	var ActiveDayStore = function (_Store) {
+	  _inherits(ActiveDayStore, _Store);
+	
+	  function ActiveDayStore(dispatcher) {
+	    _classCallCheck(this, ActiveDayStore);
+	
+	    var _this = _possibleConstructorReturn(this, (ActiveDayStore.__proto__ || Object.getPrototypeOf(ActiveDayStore)).call(this, dispatcher));
+	
+	    _this.indexOfActiveDay = {};
+	    return _this;
+	  }
+	
+	  _createClass(ActiveDayStore, [{
+	    key: 'getActiveDay',
+	    value: function getActiveDay(selectorId) {
+	      return this.indexOfActiveDay[selectorId];
+	    }
+	  }, {
+	    key: 'setActiveDay',
+	    value: function setActiveDay(selectorId, indexOfActiveDay) {
+	      console.log("setActiveDay");
+	      console.log("selectorId", selectorId);
+	      console.log("indexOfActiveDay", indexOfActiveDay);
+	      this.indexOfActiveDay[selectorId] = indexOfActiveDay;
+	    }
+	
+	    // Overriden method given by Flux library Store 
+	
+	  }, {
+	    key: '__onDispatch',
+	    value: function __onDispatch(action) {
+	
+	      switch (action.type) {
+	
+	        case actionNames.CHANGE_ACTIVE_DAY:
+	          this.setActiveDay(action.selectorId, action.indexOfActiveDay);
+	          this.__emitChange();
+	          break;
+	      }
+	    }
+	  }]);
+	
+	  return ActiveDayStore;
+	}(_utils.Store);
+	
+	var instance = new ActiveDayStore(AppDispatcher);
 	module.exports = instance;
 
 /***/ }

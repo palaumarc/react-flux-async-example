@@ -9,7 +9,7 @@ class MunicipiStore extends Store {
 
   constructor(dispatcher) {
     super(dispatcher);
-    this.numberOfMunicipisToShow = 3;
+    this.numberOfMunicipisToShow = 7;
     this.selectedMunicipisCodi = {};
   }
 
@@ -33,15 +33,8 @@ class MunicipiStore extends Store {
     var numberOfMunicipis = municipis.length;
 
     for (let i = 0; i < this.numberOfMunicipisToShow; i++) {
-      this.selectedMunicipisCodi[i] = this.selectedMunicipisCodi[i] || municipis[i%numberOfMunicipis].codi;
-
-      fetch('/municipis/' + this.selectedMunicipisCodi[i])
-        .then((response) => {
-          return response.json();
-        })
-        .then((prediccioMunicipi) => {
-          actions.receivePrediccioMunicipi(i, prediccioMunicipi);
-        });
+      var defaultSelectedMunicipi = this.selectedMunicipisCodi[i] || municipis[i%numberOfMunicipis].codi;
+      this.selectMunicipi(i, defaultSelectedMunicipi);
     }
   }
 

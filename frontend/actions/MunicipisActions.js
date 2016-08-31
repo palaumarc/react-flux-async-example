@@ -30,6 +30,14 @@ module.exports = {
       selectorId,
       prediccioMunicipi
     });
+  },
+
+  changeActiveDay: function(selectorId, indexOfActiveDay) {
+    AppDispatcher.dispatch ({
+      type: actionConstants.CHANGE_ACTIVE_DAY,
+      selectorId,
+      indexOfActiveDay
+    });
   }
 
 }
