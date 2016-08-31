@@ -9,12 +9,8 @@ class MunicipiStore extends Store {
 
   constructor(dispatcher) {
     super(dispatcher);
+    this.numberOfMunicipisToShow = 3;
     this.selectedMunicipisCodi = {};
-    this.numberOfMunicipisToShow = 7;
-  }
-
-  getNumberOfMunicipisToShow() {
-    return this.numberOfMunicipisToShow;
   }
 
   getSelectedMunicipisCodi() {
@@ -23,6 +19,14 @@ class MunicipiStore extends Store {
 
   selectMunicipi(selectorId, codiMunicipi) {
     this.selectedMunicipisCodi[selectorId] = codiMunicipi;
+
+    fetch('/municipis/' + codiMunicipi)
+    .then((response) => {
+      return response.json();
+    })
+    .then((prediccioMunicipi) => {
+      actions.receivePrediccioMunicipi(selectorId, prediccioMunicipi);
+    });
   }
 
   setDefaultSelectedMunicipis(municipis) {

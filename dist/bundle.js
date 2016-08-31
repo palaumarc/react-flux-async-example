@@ -21965,9 +21965,10 @@
 	
 	var React = __webpack_require__(/*! react */ 1);
 	var Municipi = __webpack_require__(/*! ./Municipi */ 173);
-	var municipisStore = __webpack_require__(/*! ../stores/MunicipisStore */ 181);
-	var municipiStore = __webpack_require__(/*! ../stores/MunicipiStore */ 199);
+	var municipisStore = __webpack_require__(/*! ../stores/MunicipisStore */ 199);
+	var municipiStore = __webpack_require__(/*! ../stores/MunicipiStore */ 200);
 	var actions = __webpack_require__(/*! ../actions/MunicipisActions */ 175);
+	var prediccioStore = __webpack_require__(/*! ../stores/PrediccioStore */ 181);
 	
 	var MainContainer = React.createClass({
 	  displayName: 'MainContainer',
@@ -21976,19 +21977,22 @@
 	  getInitialState: function getInitialState() {
 	    return {
 	      municipis: municipisStore.getMunicipis(),
-	      selectedMunicipisCodi: municipiStore.getSelectedMunicipisCodi()
+	      selectedMunicipisCodi: municipiStore.getSelectedMunicipisCodi(),
+	      prediccio: prediccioStore.getPrediccionsMunicipals()
 	    };
 	  },
 	
 	  componentDidMount: function componentDidMount() {
 	    this.municipisStoreRemoveToken = municipisStore.addListener(this.updateMunicipis);
 	    this.municipiStoreRemoveToken = municipiStore.addListener(this.updateSelectedMunicipi);
+	    this.prediccioStoreRemoveToken = prediccioStore.addListener(this.updatePrediccio);
 	    actions.fetchMunicipis();
 	  },
 	
 	  componentWillUnmount: function componentWillUnmount() {
 	    this.municipisStoreRemoveToken.remove();
 	    this.municipiStoreRemoveToken.remove();
+	    this.prediccioStoreRemoveToken.remove();
 	  },
 	
 	  updateSelectedMunicipi: function updateSelectedMunicipi() {
@@ -22003,6 +22007,13 @@
 	    });
 	  },
 	
+	  updatePrediccio: function updatePrediccio() {
+	    this.setState({
+	      prediccio: prediccioStore.getPrediccionsMunicipals()
+	    });
+	  },
+	
+	
 	  render: function render() {
 	    var _this = this;
 	
@@ -22015,7 +22026,13 @@
 	    }
 	
 	    var municipiPanels = Object.keys(this.state.selectedMunicipisCodi).map(function (panelId) {
-	      return React.createElement(Municipi, { key: panelId, selectorId: panelId, municipis: _this.state.municipis, selectedMunicipiCodi: _this.state.selectedMunicipisCodi[panelId] });
+	      return React.createElement(Municipi, {
+	        key: panelId,
+	        selectorId: panelId,
+	        municipis: _this.state.municipis,
+	        prediccio: _this.state.prediccio[panelId],
+	        selectedMunicipiCodi: _this.state.selectedMunicipisCodi[panelId]
+	      });
 	    });
 	
 	    return React.createElement(
@@ -22038,34 +22055,35 @@
 	'use strict';
 	
 	var React = __webpack_require__(/*! react */ 1);
-	var DadesMunicipi = __webpack_require__(/*! ./DadesMunicipi */ 174);
+	var PrediccioMunicipi = __webpack_require__(/*! ./PrediccioMunicipi */ 174);
 	var actions = __webpack_require__(/*! ../actions/MunicipisActions */ 175);
+	var prediccioStore = __webpack_require__(/*! ../stores/PrediccioStore */ 181);
 	
 	var Municipi = React.createClass({
 	  displayName: 'Municipi',
 	
+	
+	  // shouldComponentUpdate: function(nextProps, nextState) {
+	  //   return nextProps.selectedMunicipiCodi !== this.props.selectedMunicipiCodi;
+	  // },
 	
 	  selectChangeHandler: function selectChangeHandler(e) {
 	    var selectedMunicipiCodi = e.target.value;
 	    actions.selectMunicipi(this.props.selectorId, selectedMunicipiCodi);
 	  },
 	
-	  shouldComponentUpdate: function shouldComponentUpdate(nextProps, nextState) {
-	    return nextProps.selectedMunicipiCodi !== this.props.selectedMunicipiCodi;
-	  },
-	
 	  render: function render() {
 	    var _this = this;
 	
-	    var divStyle = { float: 'left' };
+	    var divStyle = { float: 'left', marginLeft: '5%' };
 	    var defaultSelectValue = 0;
-	    var nomComarca = '';
+	    var selectedMunicipi = '';
 	
 	    var listItems = this.props.municipis.map(function (municipi, index) {
 	
 	      if (municipi.codi === _this.props.selectedMunicipiCodi) {
 	        defaultSelectValue = municipi.codi;
-	        nomComarca = municipi.comarca.nom;
+	        selectedMunicipi = municipi;
 	      }
 	
 	      return React.createElement(
@@ -22075,13 +22093,19 @@
 	      );
 	    });
 	
+	    var prediccioMunicipiComponent = '';
+	
+	    if (this.props.prediccio) {
+	      prediccioMunicipiComponent = React.createElement(PrediccioMunicipi, { prediccio: this.props.prediccio });
+	    }
+	
 	    return React.createElement(
 	      'div',
 	      { style: divStyle },
 	      React.createElement(
 	        'h2',
 	        null,
-	        'Municipi:'
+	        'Municipi'
 	      ),
 	      React.createElement(
 	        'select',
@@ -22091,9 +22115,10 @@
 	      React.createElement(
 	        'h2',
 	        null,
-	        'Comarca:'
+	        'Comarca'
 	      ),
-	      nomComarca
+	      selectedMunicipi.comarca.nom,
+	      prediccioMunicipiComponent
 	    );
 	  }
 	});
@@ -22102,28 +22127,20 @@
 
 /***/ },
 /* 174 */
-/*!**********************************************!*\
-  !*** ./frontend/components/DadesMunicipi.js ***!
-  \**********************************************/
+/*!**************************************************!*\
+  !*** ./frontend/components/PrediccioMunicipi.js ***!
+  \**************************************************/
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var React = __webpack_require__(/*! react */ 1);
 	
-	var DadesMunicipi = React.createClass({
-	  displayName: 'DadesMunicipi',
+	var PrediccioMunicipi = React.createClass({
+	  displayName: 'PrediccioMunicipi',
 	
 	
 	  render: function render() {
-	
-	    if (!this.props.municipi) {
-	      return React.createElement(
-	        'div',
-	        null,
-	        'Loading...'
-	      );
-	    }
 	
 	    return React.createElement(
 	      'div',
@@ -22133,24 +22150,24 @@
 	        null,
 	        'Codi:'
 	      ),
-	      this.props.municipi.codi,
+	      this.props.prediccio.codi,
 	      React.createElement(
 	        'h3',
 	        null,
 	        'Dia1:'
 	      ),
-	      this.props.municipi.dies[0].variables.precipitacio.valor,
+	      this.props.prediccio.dies[0].variables.precipitacio.valor,
 	      React.createElement(
 	        'h3',
 	        null,
 	        'Dia2:'
 	      ),
-	      this.props.municipi.dies[1].variables.precipitacio.valor
+	      this.props.prediccio.dies[1].variables.precipitacio.valor
 	    );
 	  }
 	});
 	
-	module.exports = DadesMunicipi;
+	module.exports = PrediccioMunicipi;
 
 /***/ },
 /* 175 */
@@ -22185,7 +22202,16 @@
 	      type: actionConstants.RECEIVE_MUNICIPIS,
 	      municipis: municipis
 	    });
+	  },
+	
+	  receivePrediccioMunicipi: function receivePrediccioMunicipi(selectorId, prediccioMunicipi) {
+	    AppDispatcher.dispatch({
+	      type: actionConstants.RECEIVE_PREDICCIO_MUNICIPI,
+	      selectorId: selectorId,
+	      prediccioMunicipi: prediccioMunicipi
+	    });
 	  }
+	
 	};
 
 /***/ },
@@ -22201,7 +22227,8 @@
 	
 	  SELECT_MUNICIPI: 'SELECT_MUNICIPI',
 	  FETCH_MUNICIPIS: 'FETCH_MUNICIPIS',
-	  RECEIVE_MUNICIPIS: 'RECEIVE_MUNICIPIS'
+	  RECEIVE_MUNICIPIS: 'RECEIVE_MUNICIPIS',
+	  RECEIVE_PREDICCIO_MUNICIPI: 'RECEIVE_PREDICCIO_MUNICIPI'
 	
 	};
 
@@ -22539,7 +22566,7 @@
 /***/ },
 /* 181 */
 /*!*******************************************!*\
-  !*** ./frontend/stores/MunicipisStore.js ***!
+  !*** ./frontend/stores/PrediccioStore.js ***!
   \*******************************************/
 /***/ function(module, exports, __webpack_require__) {
 
@@ -22559,36 +22586,27 @@
 	var actions = __webpack_require__(/*! ../actions/MunicipisActions */ 175);
 	var AppDispatcher = __webpack_require__(/*! ../dispatcher/AppDispatcher */ 177);
 	
-	var MunicipisStore = function (_Store) {
-	  _inherits(MunicipisStore, _Store);
+	var MunicipiStore = function (_Store) {
+	  _inherits(MunicipiStore, _Store);
 	
-	  function MunicipisStore(dispatcher) {
-	    _classCallCheck(this, MunicipisStore);
+	  function MunicipiStore(dispatcher) {
+	    _classCallCheck(this, MunicipiStore);
 	
-	    var _this = _possibleConstructorReturn(this, (MunicipisStore.__proto__ || Object.getPrototypeOf(MunicipisStore)).call(this, dispatcher));
+	    var _this = _possibleConstructorReturn(this, (MunicipiStore.__proto__ || Object.getPrototypeOf(MunicipiStore)).call(this, dispatcher));
 	
-	    _this.municipis = [];
+	    _this.prediccioMunicipi = {};
 	    return _this;
 	  }
 	
-	  _createClass(MunicipisStore, [{
-	    key: 'getMunicipis',
-	    value: function getMunicipis() {
-	      return this.municipis;
+	  _createClass(MunicipiStore, [{
+	    key: 'getPrediccionsMunicipals',
+	    value: function getPrediccionsMunicipals() {
+	      return this.prediccioMunicipi;
 	    }
 	  }, {
-	    key: 'fetchMunicipis',
-	    value: function fetchMunicipis() {
-	      fetch('/municipis/metadades').then(function (response) {
-	        return response.json();
-	      }).then(function (receivedMetadata) {
-	        actions.receiveMunicipis(receivedMetadata);
-	      });
-	    }
-	  }, {
-	    key: 'receiveMunicipis',
-	    value: function receiveMunicipis(newMunicipis) {
-	      this.municipis = newMunicipis;
+	    key: 'setPrediccioMunicipi',
+	    value: function setPrediccioMunicipi(selectorId, prediccioMunicipi) {
+	      this.prediccioMunicipi[selectorId] = prediccioMunicipi;
 	    }
 	
 	    // Overriden method given by Flux library Store 
@@ -22599,22 +22617,18 @@
 	
 	      switch (action.type) {
 	
-	        case actionNames.FETCH_MUNICIPIS:
-	          this.fetchMunicipis();
-	          break;
-	
-	        case actionNames.RECEIVE_MUNICIPIS:
-	          this.receiveMunicipis(action.municipis);
+	        case actionNames.RECEIVE_PREDICCIO_MUNICIPI:
+	          this.setPrediccioMunicipi(action.selectorId, action.prediccioMunicipi);
 	          this.__emitChange();
 	          break;
 	      }
 	    }
 	  }]);
 	
-	  return MunicipisStore;
+	  return MunicipiStore;
 	}(_utils.Store);
 	
-	var instance = new MunicipisStore(AppDispatcher);
+	var instance = new MunicipiStore(AppDispatcher);
 	module.exports = instance;
 
 /***/ },
@@ -29113,6 +29127,87 @@
 
 /***/ },
 /* 199 */
+/*!*******************************************!*\
+  !*** ./frontend/stores/MunicipisStore.js ***!
+  \*******************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _utils = __webpack_require__(/*! flux/utils */ 182);
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var actionNames = __webpack_require__(/*! ../actions/MunicipisActionNames */ 176);
+	var actions = __webpack_require__(/*! ../actions/MunicipisActions */ 175);
+	var AppDispatcher = __webpack_require__(/*! ../dispatcher/AppDispatcher */ 177);
+	
+	var MunicipisStore = function (_Store) {
+	  _inherits(MunicipisStore, _Store);
+	
+	  function MunicipisStore(dispatcher) {
+	    _classCallCheck(this, MunicipisStore);
+	
+	    var _this = _possibleConstructorReturn(this, (MunicipisStore.__proto__ || Object.getPrototypeOf(MunicipisStore)).call(this, dispatcher));
+	
+	    _this.municipis = [];
+	    return _this;
+	  }
+	
+	  _createClass(MunicipisStore, [{
+	    key: 'getMunicipis',
+	    value: function getMunicipis() {
+	      return this.municipis;
+	    }
+	  }, {
+	    key: 'fetchMunicipis',
+	    value: function fetchMunicipis() {
+	      fetch('/municipis/metadades').then(function (response) {
+	        return response.json();
+	      }).then(function (receivedMetadata) {
+	        actions.receiveMunicipis(receivedMetadata);
+	      });
+	    }
+	  }, {
+	    key: 'receiveMunicipis',
+	    value: function receiveMunicipis(newMunicipis) {
+	      this.municipis = newMunicipis;
+	    }
+	
+	    // Overriden method given by Flux library Store 
+	
+	  }, {
+	    key: '__onDispatch',
+	    value: function __onDispatch(action) {
+	
+	      switch (action.type) {
+	
+	        case actionNames.FETCH_MUNICIPIS:
+	          this.fetchMunicipis();
+	          break;
+	
+	        case actionNames.RECEIVE_MUNICIPIS:
+	          this.receiveMunicipis(action.municipis);
+	          this.__emitChange();
+	          break;
+	      }
+	    }
+	  }]);
+	
+	  return MunicipisStore;
+	}(_utils.Store);
+	
+	var instance = new MunicipisStore(AppDispatcher);
+	module.exports = instance;
+
+/***/ },
+/* 200 */
 /*!******************************************!*\
   !*** ./frontend/stores/MunicipiStore.js ***!
   \******************************************/
@@ -29133,7 +29228,7 @@
 	var actionNames = __webpack_require__(/*! ../actions/MunicipisActionNames */ 176);
 	var actions = __webpack_require__(/*! ../actions/MunicipisActions */ 175);
 	var AppDispatcher = __webpack_require__(/*! ../dispatcher/AppDispatcher */ 177);
-	var municipisStore = __webpack_require__(/*! ./MunicipisStore */ 181);
+	var municipisStore = __webpack_require__(/*! ./MunicipisStore */ 199);
 	
 	var MunicipiStore = function (_Store) {
 	  _inherits(MunicipiStore, _Store);
@@ -29143,17 +29238,12 @@
 	
 	    var _this = _possibleConstructorReturn(this, (MunicipiStore.__proto__ || Object.getPrototypeOf(MunicipiStore)).call(this, dispatcher));
 	
+	    _this.numberOfMunicipisToShow = 3;
 	    _this.selectedMunicipisCodi = {};
-	    _this.numberOfMunicipisToShow = 7;
 	    return _this;
 	  }
 	
 	  _createClass(MunicipiStore, [{
-	    key: 'getNumberOfMunicipisToShow',
-	    value: function getNumberOfMunicipisToShow() {
-	      return this.numberOfMunicipisToShow;
-	    }
-	  }, {
 	    key: 'getSelectedMunicipisCodi',
 	    value: function getSelectedMunicipisCodi() {
 	      return this.selectedMunicipisCodi;
@@ -29162,6 +29252,12 @@
 	    key: 'selectMunicipi',
 	    value: function selectMunicipi(selectorId, codiMunicipi) {
 	      this.selectedMunicipisCodi[selectorId] = codiMunicipi;
+	
+	      fetch('/municipis/' + codiMunicipi).then(function (response) {
+	        return response.json();
+	      }).then(function (prediccioMunicipi) {
+	        actions.receivePrediccioMunicipi(selectorId, prediccioMunicipi);
+	      });
 	    }
 	  }, {
 	    key: 'setDefaultSelectedMunicipis',
