@@ -7,15 +7,17 @@ This guide has only been tested in a Ubuntu 16.04 LTS x64 environment.
 ## Technologies:
   
 Backend:
-  * [node.js] - used as execution engine
-  * [fs] - used to read data from files
-  * [express] - used to implement the REST API and as web server
+
+* [node.js] - used as execution engine
+* [fs] - used to read data from files
+* [express] - used to implement the REST API and as web server
 
 Frontend:
-  * [React.js] - used as view engine
-  * [flux] - used as application architecture
-  * [moment] - used to format dates
-  * [bootstrap] - used to apply styles
+
+* [react.js] - used as view engine
+* [flux] - used as application architecture
+* [moment] - used to format dates
+* [bootstrap] - used to apply styles
 
 ## Installation
 
