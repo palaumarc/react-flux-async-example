@@ -14,14 +14,18 @@ var PrediccioMunicipi = React.createClass({
     var divStyle = {
       margin: "5px"
     };
+  
+    var tabStyle = {
+      cursor: "pointer"
+    };
 
     var tabsOfdays = this.props.prediccio.dies.map((dia, index) => {
 
       var formattedDate = moment(dia.data).format('DD/MM/YYYY'); 
      
         return (            
-          <li key={index} onClick={this.handleTabChange} className={this.props.indexOfActiveDay == index ? 'active' : null}> 
-            <a href="#" id={index}> {formattedDate} </a>
+          <li key={index} onClick={this.handleTabChange} style={tabStyle} className={this.props.indexOfActiveDay == index ? 'active' : null}> 
+            <a id={index}> {formattedDate} </a>
           </li>
         );
       });
