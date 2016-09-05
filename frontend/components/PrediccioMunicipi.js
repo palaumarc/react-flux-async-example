@@ -11,9 +11,6 @@ var PrediccioMunicipi = React.createClass({
 
   render: function() {
 
-    var imgStyle = {};
-    
-    
     var divStyle = {
       margin: "5px"
     };
