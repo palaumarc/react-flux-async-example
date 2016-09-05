@@ -4,7 +4,7 @@ Simple weather forecast comparator between different towns in Catalonia using a 
 
 This guide has only been tested in a Ubuntu 16.04 LTS x64 environment.
 
-## Technologies:
+## Technologies
   
 Backend:
 
