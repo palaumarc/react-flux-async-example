@@ -1,10 +1,8 @@
 var express = require('express');
 var app = new express();
-var dao = require('./app/dataAccess');
 
 app.use(express.static(__dirname + '/dist'));
-dao.init();
-require('./app/routes')(app);
+app.use(require('./app/controllers/mainController'));
 
 var server = app.listen(8080, 'localhost', function () {
 
@@ -12,5 +10,4 @@ var server = app.listen(8080, 'localhost', function () {
   var port = server.address().port
 
   console.log("Example app listening at http://%s:%s", host, port)
-
 })
