@@ -1,5 +1,6 @@
 var React = require('react');
 var actions = require('../actions/MunicipisActions');
+var moment = require('moment');
 
 var PrediccioMunicipi = React.createClass({
 
@@ -10,18 +11,17 @@ var PrediccioMunicipi = React.createClass({
 
   render: function() {
 
-    var imgStyle = {};
-    
-    
     var divStyle = {
       margin: "5px"
     };
 
     var tabsOfdays = this.props.prediccio.dies.map((dia, index) => {
+
+      var formattedDate = moment(dia.data).format('DD/MM/YYYY'); 
      
         return (            
           <li key={index} onClick={this.handleTabChange} className={this.props.indexOfActiveDay == index ? 'active' : null}> 
-            <a href="#" id={index}> {dia.data} </a>
+            <a href="#" id={index}> {formattedDate} </a>
           </li>
         );
       });
