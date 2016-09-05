@@ -4,12 +4,12 @@ var actionNames = require('../actions/MunicipisActionNames');
 var actions = require('../actions/MunicipisActions');
 var AppDispatcher = require('../dispatcher/AppDispatcher');
 var municipisStore = require('./MunicipisStore');
+var config = require('../config/config');
 
 class MunicipiStore extends Store {
 
   constructor(dispatcher) {
     super(dispatcher);
-    this.numberOfMunicipisToShow = 7;
     this.selectedMunicipisCodi = {};
   }
 
@@ -32,7 +32,7 @@ class MunicipiStore extends Store {
   setDefaultSelectedMunicipis(municipis) {
     var numberOfMunicipis = municipis.length;
 
-    for (let i = 0; i < this.numberOfMunicipisToShow; i++) {
+    for (let i = 0; i < config.NUMBER_OF_MUNICIPIS_TO_SHOW; i++) {
       var defaultSelectedMunicipi = this.selectedMunicipisCodi[i] || municipis[i%numberOfMunicipis].codi;
       this.selectMunicipi(i, defaultSelectedMunicipi);
     }

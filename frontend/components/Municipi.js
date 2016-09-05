@@ -11,10 +11,6 @@ var Municipi = React.createClass({
     }
   },
 
-  // shouldComponentUpdate: function(nextProps, nextState) {
-  //   return nextProps.selectedMunicipiCodi !== this.props.selectedMunicipiCodi;
-  // },
-
   componentDidMount: function() {
     this.activeDayStoreRemoveToken = activeDayStore.addListener(this.updateActiveDay);
   },
