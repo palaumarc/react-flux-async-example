@@ -11,12 +11,6 @@ module.exports = {
     });
   },
 
-  fetchMunicipis: function() {
-    AppDispatcher.dispatch ({
-      type: actionConstants.FETCH_MUNICIPIS
-    });
-  },
-
   receiveMunicipis: function(municipis) {
     AppDispatcher.dispatch ({
       type: actionConstants.RECEIVE_MUNICIPIS,

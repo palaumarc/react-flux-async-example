@@ -1,51 +1,39 @@
 var React = require('react');
 var Municipi = require('./Municipi');
-var newMunicipisStore = require('../stores/NewMunicipisStore');
+var municipisStore = require('../stores/MunicipisStore');
 var actions = require('../actions/MunicipisActions');
-var prediccioStore = require('../stores/PrediccioStore');
 
 var MainContainer = React.createClass({
 
   getInitialState: function() {
     return {
-      municipis: newMunicipisStore.getMunicipis(),
-      codisOfSelectedMunicipis: newMunicipisStore.getCodisOfSelectedMunicipis(),
-      prediccio: newMunicipisStore.getPrediccioMunicipi()
+      municipis: municipisStore.getMunicipis(),
+      codisOfSelectedMunicipis: municipisStore.getCodisOfSelectedMunicipis(),
+      prediccio: municipisStore.getPrediccioMunicipi()
     }
   },
 
   componentDidMount: function() {
-    this.newMunicipisStoreRemoveToken = newMunicipisStore.addListener(this.updateState);
-    actions.fetchMunicipis();
+    this.municipisStoreRemoveToken = municipisStore.addListener(this.updateState);
+
+    fetch('/municipis/metadades')
+    .then((response) => {
+      return response.json();
+    })
+    .then((receivedMetadata) => {
+      actions.receiveMunicipis(receivedMetadata);
+    });
   },
 
   componentWillUnmount: function() {
-    this.newMunicipisStoreRemoveToken.remove();
+    this.municipisStoreRemoveToken.remove();
   },
 
   updateState: function() {
     this.setState({
-      municipis: newMunicipisStore.getMunicipis(),
-      codisOfSelectedMunicipis: newMunicipisStore.getCodisOfSelectedMunicipis(),
-      prediccio: newMunicipisStore.getPrediccioMunicipi()
-    })
-  },
-
-  updateSelectedMunicipi: function() {
-    this.setState({
-      codisOfSelectedMunicipis: municipiStore.getSelectedMunicipisCodi()
-    })
-  },
-
-  updateMunicipis: function() {
-    this.setState({
-      municipis: municipisStore.getMunicipis()
-    })
-  },
-
-  updatePrediccio() {
-    this.setState({
-      prediccio: prediccioStore.getPrediccionsMunicipals()
+      municipis: municipisStore.getMunicipis(),
+      codisOfSelectedMunicipis: municipisStore.getCodisOfSelectedMunicipis(),
+      prediccio: municipisStore.getPrediccioMunicipi()
     })
   },
 
