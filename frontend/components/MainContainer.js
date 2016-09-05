@@ -1,7 +1,7 @@
 var React = require('react');
 var Municipi = require('./Municipi');
 var municipisStore = require('../stores/MunicipisStore');
-var actions = require('../actions/MunicipisActions');
+var actions = require('../actions/MunicipisActions').actions;
 
 var MainContainer = React.createClass({
 
@@ -9,7 +9,6 @@ var MainContainer = React.createClass({
     return {
       municipis: municipisStore.getMunicipis(),
       codisOfSelectedMunicipis: municipisStore.getCodisOfSelectedMunicipis(),
-      prediccio: municipisStore.getPrediccioMunicipi()
     }
   },
 
@@ -32,8 +31,7 @@ var MainContainer = React.createClass({
   updateState: function() {
     this.setState({
       municipis: municipisStore.getMunicipis(),
-      codisOfSelectedMunicipis: municipisStore.getCodisOfSelectedMunicipis(),
-      prediccio: municipisStore.getPrediccioMunicipi()
+      codisOfSelectedMunicipis: municipisStore.getCodisOfSelectedMunicipis()
     })
   },
 
@@ -53,7 +51,6 @@ var MainContainer = React.createClass({
             key={panelId} 
             selectorId={panelId} 
             municipis={this.state.municipis} 
-            prediccio={this.state.prediccio[panelId]} 
             selectedMunicipiCodi={this.state.codisOfSelectedMunicipis[panelId]}
           />
         )

@@ -1,7 +1,7 @@
 import { Store } from 'flux/utils';
 
-var actionNames = require('../actions/MunicipisActionNames');
-var actions = require('../actions/MunicipisActions');
+var actionNames = require('../actions/MunicipisActions').actionNames;
+var actions = require('../actions/PrediccioMunicipiActions').actions;
 var AppDispatcher = require('../dispatcher/AppDispatcher');
 var config = require('../config/config');
 
@@ -11,7 +11,6 @@ class MunicipisStore extends Store {
     super(dispatcher);
     this.municipis = [];
     this.codisOfSelectedMunicipis = {};
-    this.prediccioMunicipi = {};
   }
 
   getMunicipis() {
@@ -20,10 +19,6 @@ class MunicipisStore extends Store {
 
   getCodisOfSelectedMunicipis() {
     return this.codisOfSelectedMunicipis;
-  }
-
-  getPrediccioMunicipi() {
-    return this.prediccioMunicipi;
   }
 
   selectMunicipi(selectorId, codiMunicipi) {
@@ -49,10 +44,6 @@ class MunicipisStore extends Store {
     }
   }
 
-  setPrediccioMunicipi(selectorId, prediccioMunicipi) {
-    this.prediccioMunicipi[selectorId] = prediccioMunicipi;
-  }
-
   // Overriden method given by Flux library Store 
   __onDispatch (action) {
 
@@ -68,10 +59,6 @@ class MunicipisStore extends Store {
         this.__emitChange();
         break;
 
-      case actionNames.RECEIVE_PREDICCIO_MUNICIPI:
-        this.setPrediccioMunicipi(action.selectorId, action.prediccioMunicipi);
-        this.__emitChange();
-        break;
     }
   }
 }

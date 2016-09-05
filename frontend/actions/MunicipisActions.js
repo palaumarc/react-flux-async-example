@@ -1,11 +1,16 @@
-var actionConstants = require('./MunicipisActionNames');
 var AppDispatcher = require('../dispatcher/AppDispatcher');
 
-module.exports = {
+var actionNames = {
+
+  SELECT_MUNICIPI: 'SELECT_MUNICIPI',
+  RECEIVE_MUNICIPIS: 'RECEIVE_MUNICIPIS',
+}
+
+module.exports.actions = {
   
   selectMunicipi: function(selectorId, codiMunicipi) {
     AppDispatcher.dispatch ({
-      type: actionConstants.SELECT_MUNICIPI,
+      type: actionNames.SELECT_MUNICIPI,
       codiMunicipi,
       selectorId
     });
@@ -13,25 +18,10 @@ module.exports = {
 
   receiveMunicipis: function(municipis) {
     AppDispatcher.dispatch ({
-      type: actionConstants.RECEIVE_MUNICIPIS,
+      type: actionNames.RECEIVE_MUNICIPIS,
       municipis
     });
-  },
-
-  receivePrediccioMunicipi: function(selectorId, prediccioMunicipi) {
-    AppDispatcher.dispatch ({
-      type: actionConstants.RECEIVE_PREDICCIO_MUNICIPI,
-      selectorId,
-      prediccioMunicipi
-    });
-  },
-
-  changeActiveDay: function(selectorId, indexOfActiveDay) {
-    AppDispatcher.dispatch ({
-      type: actionConstants.CHANGE_ACTIVE_DAY,
-      selectorId,
-      indexOfActiveDay
-    });
   }
-
 }
+
+module.exports.actionNames = actionNames;

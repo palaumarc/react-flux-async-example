@@ -1,27 +1,29 @@
 var React = require('react');
 var PrediccioMunicipi = require('./PrediccioMunicipi');
-var actions = require('../actions/MunicipisActions');
-var activeDayStore = require('../stores/ActiveDayStore');
+var actions = require('../actions/MunicipisActions').actions;
+var prediccioMunicipiStore = require('../stores/PrediccioMunicipiStore');
 
 var Municipi = React.createClass({
 
   getInitialState: function() {
     return {
-      indexOfActiveDay: activeDayStore.getActiveDay(this.props.selectorId)
+      indexOfActiveDay: prediccioMunicipiStore.getActiveDay(this.props.selectorId),
+      prediccio: prediccioMunicipiStore.getPrediccioMunicipi(this.props.selectorId)
     }
   },
 
   componentDidMount: function() {
-    this.activeDayStoreRemoveToken = activeDayStore.addListener(this.updateActiveDay);
+    this.prediccioMunicipiStoreRemoveToken = prediccioMunicipiStore.addListener(this.updateState);
   },
 
   componentWillUnmount: function() {
-    this.activeDayStoreRemoveToken.remove();
+    this.prediccioMunicipiStoreRemoveToken.remove();
   },
 
-  updateActiveDay: function() {
+  updateState: function() {
     this.setState({
-      indexOfActiveDay: activeDayStore.getActiveDay(this.props.selectorId)
+      indexOfActiveDay: prediccioMunicipiStore.getActiveDay(this.props.selectorId),
+      prediccio: prediccioMunicipiStore.getPrediccioMunicipi(this.props.selectorId)
     });
   },
 
@@ -48,10 +50,10 @@ var Municipi = React.createClass({
 
     var prediccioMunicipiComponent = '';
 
-    if (this.props.prediccio) {
+    if (this.state.prediccio) {
       prediccioMunicipiComponent = <PrediccioMunicipi 
                                       selectorId={this.props.selectorId} 
-                                      prediccio={this.props.prediccio} 
+                                      prediccio={this.state.prediccio} 
                                       indexOfActiveDay={this.state.indexOfActiveDay || 0}
                                     />
     }

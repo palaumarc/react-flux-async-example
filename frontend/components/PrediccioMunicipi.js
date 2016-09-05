@@ -1,6 +1,6 @@
 var React = require('react');
-var actions = require('../actions/MunicipisActions');
 var moment = require('moment');
+var actions = require('../actions/PrediccioMunicipiActions').actions;
 
 var PrediccioMunicipi = React.createClass({
 
