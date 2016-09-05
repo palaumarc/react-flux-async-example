@@ -1,6 +1,6 @@
-import React from 'react';
-import {render} from 'react-dom';
-import MainContainer from './components/MainContainer'
+var React = require('react');
+var render = require('react-dom').render;
+var MainContainer = require('./components/MainContainer');
 
 class App extends React.Component {
 

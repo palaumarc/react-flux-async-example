@@ -1,4 +1,4 @@
-import { Dispatcher } from 'flux'
+var Dispatcher = require('flux').Dispatcher;
 
 const AppDispatcher = new Dispatcher();
 module.exports = AppDispatcher;

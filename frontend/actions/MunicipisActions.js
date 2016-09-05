@@ -3,7 +3,7 @@ var AppDispatcher = require('../dispatcher/AppDispatcher');
 var actionNames = {
 
   SELECT_MUNICIPI: 'SELECT_MUNICIPI',
-  RECEIVE_MUNICIPIS: 'RECEIVE_MUNICIPIS',
+  RECEIVE_MUNICIPIS: 'RECEIVE_MUNICIPIS'
 }
 
 module.exports.actions = {

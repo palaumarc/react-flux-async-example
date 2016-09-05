@@ -1,5 +1,4 @@
-import { Store } from 'flux/utils';
-
+var Store = require('flux/utils').Store;
 var actionNames = require('../actions/MunicipisActions').actionNames;
 var actions = require('../actions/PrediccioMunicipiActions').actions;
 var AppDispatcher = require('../dispatcher/AppDispatcher');
