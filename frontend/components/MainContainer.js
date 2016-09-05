@@ -1,7 +1,6 @@
 var React = require('react');
 var Municipi = require('./Municipi');
-var municipisStore = require('../stores/MunicipisStore');
-var municipiStore = require('../stores/MunicipiStore');
+var newMunicipisStore = require('../stores/NewMunicipisStore');
 var actions = require('../actions/MunicipisActions');
 var prediccioStore = require('../stores/PrediccioStore');
 
@@ -9,28 +8,32 @@ var MainContainer = React.createClass({
 
   getInitialState: function() {
     return {
-      municipis: municipisStore.getMunicipis(),
-      selectedMunicipisCodi: municipiStore.getSelectedMunicipisCodi(),
-      prediccio: prediccioStore.getPrediccionsMunicipals()
+      municipis: newMunicipisStore.getMunicipis(),
+      codisOfSelectedMunicipis: newMunicipisStore.getCodisOfSelectedMunicipis(),
+      prediccio: newMunicipisStore.getPrediccioMunicipi()
     }
   },
 
   componentDidMount: function() {
-    this.municipisStoreRemoveToken = municipisStore.addListener(this.updateMunicipis);
-    this.municipiStoreRemoveToken = municipiStore.addListener(this.updateSelectedMunicipi);
-    this.prediccioStoreRemoveToken = prediccioStore.addListener(this.updatePrediccio);
+    this.newMunicipisStoreRemoveToken = newMunicipisStore.addListener(this.updateState);
     actions.fetchMunicipis();
   },
 
   componentWillUnmount: function() {
-    this.municipisStoreRemoveToken.remove();
-    this.municipiStoreRemoveToken.remove();
-    this.prediccioStoreRemoveToken.remove();
+    this.newMunicipisStoreRemoveToken.remove();
+  },
+
+  updateState: function() {
+    this.setState({
+      municipis: newMunicipisStore.getMunicipis(),
+      codisOfSelectedMunicipis: newMunicipisStore.getCodisOfSelectedMunicipis(),
+      prediccio: newMunicipisStore.getPrediccioMunicipi()
+    })
   },
 
   updateSelectedMunicipi: function() {
     this.setState({
-      selectedMunicipisCodi: municipiStore.getSelectedMunicipisCodi()
+      codisOfSelectedMunicipis: municipiStore.getSelectedMunicipisCodi()
     })
   },
 
@@ -56,14 +59,14 @@ var MainContainer = React.createClass({
       )
     }
 
-    var municipiPanels = Object.keys(this.state.selectedMunicipisCodi).map((panelId) => {
+    var municipiPanels = Object.keys(this.state.codisOfSelectedMunicipis).map((panelId) => {
         return (
           <Municipi 
             key={panelId} 
             selectorId={panelId} 
             municipis={this.state.municipis} 
             prediccio={this.state.prediccio[panelId]} 
-            selectedMunicipiCodi={this.state.selectedMunicipisCodi[panelId]}
+            selectedMunicipiCodi={this.state.codisOfSelectedMunicipis[panelId]}
           />
         )
       });
